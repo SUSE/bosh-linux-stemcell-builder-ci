@@ -57,7 +57,7 @@ jobs:
         get_params:
           skip_download: true
 
-  - name: build-fissile-stemcell-ubuntu
+  - name: build-fissile-stemcell-ubuntu-trusty
     plan:
       - get: ci
         passed:
@@ -125,7 +125,7 @@ jobs:
           from: obs.fissile_base_image-output
           commit: { message: "latest build" }
 
-  - name: build-fissile-stemcell-opensuse
+  - name: build-fissile-stemcell-opensuse-leap
     plan:
       - get: ci
         passed:
