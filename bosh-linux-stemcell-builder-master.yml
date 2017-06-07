@@ -37,7 +37,7 @@ jobs:
         params:
           OPERATING_SYSTEM_NAME:      ubuntu
           OPERATING_SYSTEM_VERSION:   trusty
-      - put: s3.ubuntu-os-image
+      - put: s3.ubuntu-trusty-os-image
         params:
           file: os-image/ubuntu-trusty.tgz
           acl: public-read
@@ -99,7 +99,7 @@ jobs:
           OPERATING_SYSTEM_VERSION:   leap
       - task: prepare-osc
         file: ci/tasks/prepare-osc.yml
-      - put: s3.opensuse-os-image
+      - put: s3.opensuse-leap-os-image
         params:
           file: os-image/opensuse-leap.tgz
           acl: public-read
@@ -161,10 +161,182 @@ jobs:
         params:
           OPERATING_SYSTEM_NAME:      centos
           OPERATING_SYSTEM_VERSION:   7
-      - put: s3.centos-os-image
+      - put: s3.centos-7-os-image
         params:
           file: os-image/centos-7.tgz
           acl: public-read
+
+  - name: build-stemcell
+    serial: true
+    plan:
+      - get: ci
+      - get: src
+      - get: s3.ubuntu-trusty-os-image
+      - get: s3.centos-7-os-image
+      - get: s3.opensuse-leap-os-image
+      - get: bosh-io-release.bosh
+      - get: semver.bosh-stemcell
+        params:
+          bump: major
+      - put: semver.bosh-stemcell
+        params:
+          file: semver.bosh-stemcell/number
+
+  - name: test-stemcells
+    serial: true
+    plan:
+      - aggregate:
+        - get: semver.bosh-stemcell
+          passed:
+            - build-stemcell
+            - build-openstack-kvm-ubuntu-trusty
+            - build-openstack-kvm-centos-7
+            - build-openstack-kvm-opensuse-leap
+        - get: src
+          passed:
+            - build-stemcell
+            - build-openstack-kvm-ubuntu-trusty
+            - build-openstack-kvm-centos-7
+            - build-openstack-kvm-opensuse-leap
+        - get: ci
+          passed:
+            - build-stemcell
+            - build-openstack-kvm-ubuntu-trusty
+            - build-openstack-kvm-centos-7
+            - build-openstack-kvm-opensuse-leap
+        - get: bosh-io-release.syslog-release
+
+  - name: publish-stemcells
+    serial: true
+    plan:
+      - aggregate:
+        - get: semver.bosh-stemcell
+          trigger: true
+          passed: [test-stemcells]
+        - get: ci
+          passed: [test-stemcells]
+        - get: src
+          passed: [test-stemcells]
+      - task: publish
+        file: ci/tasks/publish.yml
+        params:
+          AWS_ACCESS_KEY_ID: {{aws-access-key}}
+          AWS_DEFAULT_REGION: eu-central-1
+          AWS_SECRET_ACCESS_KEY: {{aws-secret-key}}
+          BUCKET_NAME: concourse-bosh-stemcell
+          CANDIDATE_PREFIX: bosh-stemcell-candidate/
+          PUBLISHED_PREFIX: bosh-stemcell/
+          COPY_KEYS: |
+            openstack/bosh-stemcell-%s-openstack-kvm-ubuntu-trusty-go_agent.tgz
+            openstack/bosh-stemcell-%s-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
+            openstack/bosh-stemcell-%s-openstack-kvm-centos-7-go_agent.tgz
+            openstack/bosh-stemcell-%s-openstack-kvm-centos-7-go_agent-raw.tgz
+            openstack/bosh-stemcell-%s-openstack-kvm-opensuse-leap-go_agent.tgz
+            openstack/bosh-stemcell-%s-openstack-kvm-opensuse-leap-go_agent-raw.tgz
+
+  #
+  # openstack
+  #
+
+  - name: build-openstack-kvm-ubuntu-trusty
+    serial_groups: [builds]
+    plan:
+      - aggregate:
+          - get: semver.bosh-stemcell
+            trigger: true
+            passed: [build-stemcell]
+          - get: ci
+            passed: [build-stemcell]
+          - get: src
+            passed: [build-stemcell]
+          - get: bosh-io-release.bosh
+            passed: [build-stemcell]
+          - get: os-image
+            resource: s3.ubuntu-trusty-os-image
+            passed: [build-stemcell]
+      - task: build
+        file: ci/tasks/build.yml
+        privileged: true
+        params:
+          IAAS:       openstack
+          HYPERVISOR: kvm
+          OS_NAME:    ubuntu
+          OS_VERSION: trusty
+          OS_IMAGE_BUCKET: concourse-bosh-image
+      - aggregate:
+        - put: s3.openstack-kvm-ubuntu-trusty-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: s3.openstack-kvm-ubuntu-trusty
+          params:
+            file: stemcell/*-go_agent.tgz
+
+  - name: build-openstack-kvm-centos-7
+    serial_groups: [builds]
+    plan:
+      - aggregate:
+          - get: semver.bosh-stemcell
+            trigger: true
+            passed: [build-stemcell]
+          - get: ci
+            passed: [build-stemcell]
+          - get: src
+            passed: [build-stemcell]
+          - get: bosh-io-release.bosh
+            passed: [build-stemcell]
+          - get: os-image
+            resource: s3.centos-7-os-image
+            passed: [build-stemcell]
+      - task: build
+        file: ci/tasks/build.yml
+        privileged: true
+        params:
+          IAAS:       openstack
+          HYPERVISOR: kvm
+          OS_NAME:    centos
+          OS_VERSION: 7
+          OS_IMAGE_BUCKET: concourse-bosh-image
+      - aggregate:
+        - put: s3.openstack-kvm-centos-7-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: s3.openstack-kvm-centos-7
+          params:
+            file: stemcell/*-go_agent.tgz
+
+
+  - name: build-openstack-kvm-opensuse-leap
+    serial_groups: [builds]
+    plan:
+      - aggregate:
+          - get: semver.bosh-stemcell
+            trigger: true
+            passed: [build-stemcell]
+          - get: ci
+            passed: [build-stemcell]
+          - get: src
+            passed: [build-stemcell]
+          - get: bosh-io-release.bosh
+            passed: [build-stemcell]
+          - get: os-image
+            resource: s3.opensuse-leap-os-image
+            passed: [build-stemcell]
+      - task: build
+        file: ci/tasks/build.yml
+        privileged: true
+        params:
+          IAAS:       openstack
+          HYPERVISOR: kvm
+          OS_NAME:    opensuse
+          OS_VERSION: leap
+          OS_IMAGE_BUCKET: concourse-bosh-image
+      - aggregate:
+        - put: s3.openstack-kvm-opensuse-leap-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: s3.openstack-kvm-opensuse-leap
+          params:
+            file: stemcell/*-go_agent.tgz
 
 resources:
   - name: ci
@@ -224,7 +396,7 @@ resources:
   # ubuntu-trusty
   #
 
-  - name: s3.ubuntu-os-image
+  - name: s3.ubuntu-trusty-os-image
     type: s3
     source:
       bucket: concourse-bosh-image
@@ -272,7 +444,7 @@ resources:
   # centos-7
   #
 
-  - name: s3.centos-os-image
+  - name: s3.centos-7-os-image
     type: s3
     source:
       bucket: concourse-bosh-image
@@ -304,7 +476,7 @@ resources:
   # opensuse
   #
 
-  - name: s3.opensuse-os-image
+  - name: s3.opensuse-leap-os-image
     type: s3
     source:
       bucket: concourse-bosh-image
