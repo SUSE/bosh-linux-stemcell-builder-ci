@@ -80,7 +80,7 @@ sudo --preserve-env --set-home --user ubuntu -- /bin/bash --login -i <<SUDO
     echo "Exiting."
     exit 1
   else
-    cp ci/ci/pipelines/bosh-stemcells/assets/stemcell_dependency_fetcher.rb "$dependency_fetcher_path"
+    cp ci/assets/stemcell_dependency_fetcher.rb "$dependency_fetcher_path"
   fi
 
   cd src

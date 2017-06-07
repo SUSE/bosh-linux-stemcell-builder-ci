@@ -39,7 +39,7 @@ jobs:
         params:
           bump: minor
       - task: build-ubuntu-centos
-        file: ci/ci/pipelines/bosh-os-images/tasks/build-os-image-ubuntu-centos.yml
+        file: ci/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      ubuntu
@@ -72,7 +72,7 @@ jobs:
         passed:
           - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
-        file: ci/ci/pipelines/bosh-os-images/tasks/setup-ubuntu-stemcell-versions.yml
+        file: ci/tasks/setup-ubuntu-stemcell-versions.yml
       - put: docker.fissile-stemcell-ubuntu
         inputs:
           - name: semver.ubuntu-stemcell
