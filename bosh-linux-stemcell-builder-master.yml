@@ -37,11 +37,11 @@ jobs:
         params:
           OPERATING_SYSTEM_NAME:      ubuntu
           OPERATING_SYSTEM_VERSION:   trusty
-      - put: s3.ubuntu
+      - put: s3.ubuntu-os-image
         params:
           file: os-image/ubuntu-trusty.tgz
           acl: public-read
-      - put: docker.ubuntu
+      - put: docker.ubuntu-os-image
         params:
           tag_prefix: "trusty-"
           tag: semver.ubuntu-stemcell/number
@@ -55,7 +55,7 @@ jobs:
       - get: ci
         passed:
           - start-job
-      - get: docker.ubuntu
+      - get: docker.ubuntu-os-image
         trigger: true
         passed:
           - build-ubuntu-trusty
@@ -99,11 +99,11 @@ jobs:
           OPERATING_SYSTEM_VERSION:   leap
       - task: prepare-osc
         file: ci/ci/pipelines/bosh-os-images/tasks/prepare-osc.yml
-      - put: s3.opensuse
+      - put: s3.opensuse-os-image
         params:
           file: os-image/opensuse-leap.tgz
           acl: public-read
-      - put: docker.opensuse
+      - put: docker.opensuse-os-image
         inputs:
           - name: semver.opensuse-stemcell
         params:
@@ -123,7 +123,7 @@ jobs:
       - get: ci
         passed:
           - build-opensuse-leap
-      - get: docker.opensuse
+      - get: docker.opensuse-os-image
         trigger: true
         passed:
           - build-opensuse-leap
@@ -161,7 +161,7 @@ jobs:
         params:
           OPERATING_SYSTEM_NAME:      centos
           OPERATING_SYSTEM_VERSION:   7
-      - put: s3.centos
+      - put: s3.centos-os-image
         params:
           file: os-image/centos-7.tgz
           acl: public-read
@@ -170,7 +170,7 @@ resources:
   - name: ci
     type: git
     source:
-      uri: git@github.com:SUSE/cloudfoundry.git
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
       private_key: {{github-private-key}}
 
   - name: src
@@ -210,20 +210,49 @@ resources:
       file: version
       private_key: {{github-private-key}}
       initial_version: 1.0.0
+
+  - name: semver.bosh-stemcell
+    type: semver
+    source:
+      driver: s3
+      key: bosh-stemcell/version
+      bucket: concourse-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
   #
   # ubuntu-trusty
   #
 
-  - name: s3.ubuntu
+  - name: s3.ubuntu-os-image
     type: s3
     source:
       bucket: concourse-bosh-image
+      regexp: bosh-ubuntu-trusty-(.+).tgz
       versioned_file: bosh-ubuntu-trusty-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
-  - name: docker.ubuntu
+  - name: s3.openstack-kvm-ubuntu-trusty
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+  
+  - name: s3.openstack-kvm-ubuntu-trusty-raw
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1      
+
+  - name: docker.ubuntu-os-image
     type: docker-image
     source:
       repository: splatform/os-image-ubuntu
@@ -243,29 +272,67 @@ resources:
   # centos-7
   #
 
-  - name: s3.centos
+  - name: s3.centos-os-image
     type: s3
     source:
       bucket: concourse-bosh-image
+      regexp: bosh-centos-7-(.+).tgz      
       versioned_file: bosh-centos-7-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
+  - name: s3.openstack-kvm-centos-7
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-centos-7-raw
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent-raw.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1      
+
   #
   # opensuse
   #
 
-  - name: s3.opensuse
+  - name: s3.opensuse-os-image
     type: s3
     source:
       bucket: concourse-bosh-image
+      regexp: bosh-opensuse-leap-(.+).tgz      
       versioned_file: bosh-opensuse-leap-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
-  - name: docker.opensuse
+  - name: s3.openstack-kvm-opensuse-leap
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-opensuse-leap-raw
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent-raw.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1      
+
+  - name: docker.opensuse-os-image
     type: docker-image
     source:
       repository: splatform/os-image-opensuse
@@ -288,3 +355,16 @@ resources:
       package: fissile_base_image
       username: {{obs-username}}
       password: {{obs-password}}
+
+  #
+  # bosh releases
+  #
+  - name: bosh-io-release.bosh
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
+  - name: bosh-io-release.syslog-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/syslog-release
