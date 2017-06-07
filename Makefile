@@ -13,4 +13,4 @@ login-sandbox:
 
 pipeline-master:
 	yes | fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-master.yml -p stemcells-master -l ../cloudfoundry/secure/concourse-secrets.yml
-	fly -t vancouver unpause-pipeline -p stemcells-master
+	fly -t ${TARGET} unpause-pipeline -p stemcells-master
