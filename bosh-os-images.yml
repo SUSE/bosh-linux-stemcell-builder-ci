@@ -1,0 +1,290 @@
+---
+resource_types:
+  - name: docker-open-build-service-resource
+    type: docker-image
+    source:
+        repository: machinerytool/concourse-open-build-service-resource
+        tag: latest
+
+jobs:
+  #
+  # Pipeline won't automatically build if src changes, need to
+  # run start-job manually first to unblock the resource
+  #
+  - name: start-job
+    serial: true
+    plan:
+      - get: src
+      - get: ci
+
+  - name: build-ubuntu-trusty
+    serial_groups: [builds]
+    plan:
+      - get: src
+        trigger: true
+        passed:
+          - start-job
+      - get: ci
+        trigger: true
+        passed:
+          - start-job
+      - put: semver.ubuntu-stemcell
+        params:
+          bump: minor
+      - task: build-ubuntu-centos
+        file: ci/ci/pipelines/bosh-os-images/tasks/build-ubuntu-centos.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      ubuntu
+          OPERATING_SYSTEM_VERSION:   trusty
+      - put: s3.ubuntu
+        params:
+          file: os-image/ubuntu-trusty.tgz
+          acl: public-read
+      - put: docker.ubuntu
+        params:
+          tag_prefix: "trusty-"
+          tag: semver.ubuntu-stemcell/number
+          import_file: os-image/ubuntu-trusty.tgz
+          tag_as_latest: true
+        get_params:
+          skip_download: true
+
+  - name: build-fissile-stemcell-ubuntu
+    plan:
+      - get: ci
+        passed:
+          - start-job
+      - get: docker.ubuntu
+        trigger: true
+        passed:
+          - build-ubuntu-trusty
+      - get: git.fissile-stemcell-ubuntu
+        trigger: true
+      - get: semver.ubuntu-stemcell
+        passed:
+          - build-ubuntu-trusty
+      - task: setup-ubuntu-stemcell-versions
+        file: ci/ci/pipelines/bosh-os-images/tasks/setup-ubuntu-stemcell-versions.yml
+      - put: docker.fissile-stemcell-ubuntu
+        inputs:
+          - name: semver.ubuntu-stemcell
+          - name: versioned-fissile-stemcell-ubuntu
+        params:
+          build: versioned-fissile-stemcell-ubuntu
+          tag: versioned-fissile-stemcell-ubuntu/VERSION
+        get_params:
+          skip_download: true
+
+  - name: build-opensuse-leap
+    serial_groups: [builds]
+    plan:
+      - get: src
+        trigger: true
+        passed:
+          - start-job
+      - get: ci
+        trigger: true
+        passed:
+          - start-job
+      - get: obs.fissile_base_image
+      - put: semver.opensuse-stemcell
+        params:
+          bump: minor
+      - task: build
+        file: ci/ci/pipelines/bosh-os-images/tasks/build.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      opensuse
+          OPERATING_SYSTEM_VERSION:   leap
+      - task: prepare-osc
+        file: ci/ci/pipelines/bosh-os-images/tasks/prepare-osc.yml
+      - put: s3.opensuse
+        params:
+          file: os-image/opensuse-leap.tgz
+          acl: public-read
+      - put: docker.opensuse
+        inputs:
+          - name: semver.opensuse-stemcell
+        params:
+          tag_prefix: "42.2-"
+          tag: semver.opensuse-stemcell/number
+          import_file: os-image/opensuse-leap.tgz
+          tag_as_latest: true
+        get_params:
+          skip_download: true
+      - put: obs.fissile_base_image
+        params:
+          from: obs.fissile_base_image-output
+          commit: { message: "latest build" }
+
+  - name: build-fissile-stemcell-opensuse
+    plan:
+      - get: ci
+        passed:
+          - build-opensuse-leap
+      - get: docker.opensuse
+        trigger: true
+        passed:
+          - build-opensuse-leap
+      - get: git.fissile-stemcell-opensuse
+        trigger: true
+      - get: semver.opensuse-stemcell
+        passed:
+          - build-opensuse-leap
+      - task: setup-opensuse-stemcell-versions
+        file: ci/ci/pipelines/bosh-os-images/tasks/setup-opensuse-stemcell-versions.yml
+      - put: docker.fissile-stemcell-opensuse
+        inputs:
+          - name: semver.opensuse-stemcell-opensuse
+          - name: versioned-fissile-stemcell
+        params:
+          build: versioned-fissile-stemcell-opensuse
+          tag: versioned-fissile-stemcell-opensuse/VERSION
+        get_params:
+          skip_download: true
+
+  - name: build-centos-7
+    serial_groups: [builds]
+    plan:
+      - get: src
+        trigger: true
+        passed:
+          - start-job
+      - get: ci
+        trigger: true
+        passed:
+          - start-job
+      - task: build-ubuntu-centos
+        file: ci/ci/pipelines/bosh-os-images/tasks/build-ubuntu-centos.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      centos
+          OPERATING_SYSTEM_VERSION:   7
+      - put: s3.centos
+        params:
+          file: os-image/centos-7.tgz
+          acl: public-read
+
+resources:
+  - name: ci
+    type: git
+    source:
+      uri: git@github.com:SUSE/cloudfoundry.git
+      private_key: {{github-private-key}}
+
+  - name: src
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
+      branch: opensuse_stemcell_with_patched_go_agent
+      private_key: {{github-private-key}}
+
+  - name: git.fissile-stemcell-opensuse
+    type: git
+    source:
+      uri: https://github.com/SUSE/fissile-stemcell-opensuse.git
+      branch: 42.2
+
+  - name: git.fissile-stemcell-ubuntu
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-community/fissile-stemcell-ubuntu.git
+      branch: trusty
+
+  - name: semver.opensuse-stemcell
+    type: semver
+    source:
+      driver: git
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
+      branch: opensuse_stemcell_version
+      file: version
+      private_key: {{github-private-key}}
+
+  - name: semver.ubuntu-stemcell
+    type: semver
+    source:
+      driver: git
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
+      branch: ubuntu_stemcell_version
+      file: version
+      private_key: {{github-private-key}}
+      initial_version: 1.0.0
+  #
+  # ubuntu-trusty
+  #
+
+  - name: s3.ubuntu
+    type: s3
+    source:
+      bucket: concourse-bosh-image
+      versioned_file: bosh-ubuntu-trusty-os-image.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: docker.ubuntu
+    type: docker-image
+    source:
+      repository: splatform/os-image-ubuntu
+      tag: trusty
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.fissile-stemcell-ubuntu
+    type: docker-image
+    source:
+      repository: splatform/fissile-stemcell-ubuntu
+      tag: trusty
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  #
+  # centos-7
+  #
+
+  - name: s3.centos
+    type: s3
+    source:
+      bucket: concourse-bosh-image
+      versioned_file: bosh-centos-7-os-image.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  #
+  # opensuse
+  #
+
+  - name: s3.opensuse
+    type: s3
+    source:
+      bucket: concourse-bosh-image
+      versioned_file: bosh-opensuse-leap-os-image.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: docker.opensuse
+    type: docker-image
+    source:
+      repository: splatform/os-image-opensuse
+      tag: "latest"
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.fissile-stemcell-opensuse
+    type: docker-image
+    source:
+      repository: splatform/fissile-stemcell-opensuse
+      tag: "42.2"
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: obs.fissile_base_image
+    type: docker-open-build-service-resource
+    source:
+      project: home:DKarakasilis
+      package: fissile_base_image
+      username: {{obs-username}}
+      password: {{obs-password}}

@@ -1,0 +1,19 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: machinerytool/suse-os-image-stemcell-builder
+
+
+inputs:
+- name: ci
+- name: os-image
+- name: obs.fissile_base_image
+
+outputs:
+- name: obs.fissile_base_image-output
+
+run:
+  path: ci/ci/pipelines/bosh-os-images/tasks/prepare-osc.sh
