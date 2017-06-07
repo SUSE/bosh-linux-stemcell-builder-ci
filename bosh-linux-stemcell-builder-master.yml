@@ -16,8 +16,15 @@ jobs:
     plan:
       - get: src
       - get: ci
+      - get: bosh-io-release.bosh
+      - get: semver.bosh-stemcell
+        params:
+          bump: major
+      - put: semver.bosh-stemcell
+        params:
+          file: semver.bosh-stemcell/number
 
-  - name: build-ubuntu-trusty
+  - name: build-os-image-ubuntu-trusty
     serial_groups: [builds]
     plan:
       - get: src
@@ -58,12 +65,12 @@ jobs:
       - get: docker.ubuntu-os-image
         trigger: true
         passed:
-          - build-ubuntu-trusty
+          - build-os-image-ubuntu-trusty
       - get: git.fissile-stemcell-ubuntu
         trigger: true
       - get: semver.ubuntu-stemcell
         passed:
-          - build-ubuntu-trusty
+          - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
         file: ci/ci/pipelines/bosh-os-images/tasks/setup-ubuntu-stemcell-versions.yml
       - put: docker.fissile-stemcell-ubuntu
@@ -76,7 +83,7 @@ jobs:
         get_params:
           skip_download: true
 
-  - name: build-opensuse-leap
+  - name: build-os-image-opensuse-leap
     serial_groups: [builds]
     plan:
       - get: src
@@ -122,16 +129,16 @@ jobs:
     plan:
       - get: ci
         passed:
-          - build-opensuse-leap
+          - build-os-image-opensuse-leap
       - get: docker.opensuse-os-image
         trigger: true
         passed:
-          - build-opensuse-leap
+          - build-os-image-opensuse-leap
       - get: git.fissile-stemcell-opensuse
         trigger: true
       - get: semver.opensuse-stemcell
         passed:
-          - build-opensuse-leap
+          - build-os-image-opensuse-leap
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
       - put: docker.fissile-stemcell-opensuse
@@ -144,7 +151,7 @@ jobs:
         get_params:
           skip_download: true
 
-  - name: build-centos-7
+  - name: build-os-image-centos-7
     serial_groups: [builds]
     plan:
       - get: src
@@ -166,21 +173,6 @@ jobs:
           file: os-image/centos-7.tgz
           acl: public-read
 
-  - name: build-stemcell
-    serial: true
-    plan:
-      - get: ci
-      - get: src
-      - get: s3.ubuntu-trusty-os-image
-      - get: s3.centos-7-os-image
-      - get: s3.opensuse-leap-os-image
-      - get: bosh-io-release.bosh
-      - get: semver.bosh-stemcell
-        params:
-          bump: major
-      - put: semver.bosh-stemcell
-        params:
-          file: semver.bosh-stemcell/number
 
   - name: test-stemcells
     serial: true
@@ -188,19 +180,19 @@ jobs:
       - aggregate:
         - get: semver.bosh-stemcell
           passed:
-            - build-stemcell
+            - start-job
             - build-openstack-kvm-ubuntu-trusty
             - build-openstack-kvm-centos-7
             - build-openstack-kvm-opensuse-leap
         - get: src
           passed:
-            - build-stemcell
+            - start-job
             - build-openstack-kvm-ubuntu-trusty
             - build-openstack-kvm-centos-7
             - build-openstack-kvm-opensuse-leap
         - get: ci
           passed:
-            - build-stemcell
+            - start-job
             - build-openstack-kvm-ubuntu-trusty
             - build-openstack-kvm-centos-7
             - build-openstack-kvm-opensuse-leap
@@ -244,16 +236,16 @@ jobs:
       - aggregate:
           - get: semver.bosh-stemcell
             trigger: true
-            passed: [build-stemcell]
+            passed: [start-job]
           - get: ci
-            passed: [build-stemcell]
+            passed: [build-os-image-ubuntu-trusty]
           - get: src
-            passed: [build-stemcell]
+            passed: [build-os-image-ubuntu-trusty]
           - get: bosh-io-release.bosh
-            passed: [build-stemcell]
+            passed: [start-job]
           - get: os-image
             resource: s3.ubuntu-trusty-os-image
-            passed: [build-stemcell]
+            passed: [build-os-image-ubuntu-trusty]
       - task: build
         file: ci/tasks/build.yml
         privileged: true
@@ -277,16 +269,16 @@ jobs:
       - aggregate:
           - get: semver.bosh-stemcell
             trigger: true
-            passed: [build-stemcell]
+            passed: [start-job]
           - get: ci
-            passed: [build-stemcell]
+            passed: [build-os-image-centos-7]
           - get: src
-            passed: [build-stemcell]
+            passed: [build-os-image-centos-7]
           - get: bosh-io-release.bosh
-            passed: [build-stemcell]
+            passed: [start-job]
           - get: os-image
             resource: s3.centos-7-os-image
-            passed: [build-stemcell]
+            passed: [build-os-image-centos-7]
       - task: build
         file: ci/tasks/build.yml
         privileged: true
@@ -311,16 +303,16 @@ jobs:
       - aggregate:
           - get: semver.bosh-stemcell
             trigger: true
-            passed: [build-stemcell]
+            passed: [start-job]
           - get: ci
-            passed: [build-stemcell]
+            passed: [build-os-image-opensuse-leap]
           - get: src
-            passed: [build-stemcell]
+            passed: [build-os-image-opensuse-leap]
           - get: bosh-io-release.bosh
-            passed: [build-stemcell]
+            passed: [start-job]
           - get: os-image
             resource: s3.opensuse-leap-os-image
-            passed: [build-stemcell]
+            passed: [build-os-image-opensuse-leap]
       - task: build
         file: ci/tasks/build.yml
         privileged: true
