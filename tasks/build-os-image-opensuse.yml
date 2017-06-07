@@ -4,17 +4,18 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: bosh/os-image-stemcell-builder
+    repository: machinerytool/suse-os-image-stemcell-builder
+
 
 inputs:
   - name: src
   - name: ci
 
 outputs:
-- name: os-image
+  - name: os-image
 
 run:
-  path: ci/ci/pipelines/bosh-os-images/tasks/build-ubuntu-centos.sh
+  path: ci/tasks/build-os-image-opensuse.sh
 
 params:
   OPERATING_SYSTEM_NAME:      replace-me

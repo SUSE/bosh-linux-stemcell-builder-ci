@@ -16,4 +16,4 @@ outputs:
 - name: obs.fissile_base_image-output
 
 run:
-  path: ci/ci/pipelines/bosh-os-images/tasks/prepare-osc.sh
+  path: ci/tasks/prepare-osc.sh

@@ -32,7 +32,7 @@ jobs:
         params:
           bump: minor
       - task: build-ubuntu-centos
-        file: ci/ci/pipelines/bosh-os-images/tasks/build-ubuntu-centos.yml
+        file: ci/ci/pipelines/bosh-os-images/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      ubuntu
@@ -92,13 +92,13 @@ jobs:
         params:
           bump: minor
       - task: build
-        file: ci/ci/pipelines/bosh-os-images/tasks/build.yml
+        file: ci/tasks/build-os-image-opensuse.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      opensuse
           OPERATING_SYSTEM_VERSION:   leap
       - task: prepare-osc
-        file: ci/ci/pipelines/bosh-os-images/tasks/prepare-osc.yml
+        file: ci/tasks/prepare-osc.yml
       - put: s3.opensuse-os-image
         params:
           file: os-image/opensuse-leap.tgz
@@ -133,7 +133,7 @@ jobs:
         passed:
           - build-opensuse-leap
       - task: setup-opensuse-stemcell-versions
-        file: ci/ci/pipelines/bosh-os-images/tasks/setup-opensuse-stemcell-versions.yml
+        file: ci/tasks/setup-opensuse-stemcell-versions.yml
       - put: docker.fissile-stemcell-opensuse
         inputs:
           - name: semver.opensuse-stemcell-opensuse
@@ -156,7 +156,7 @@ jobs:
         passed:
           - start-job
       - task: build-ubuntu-centos
-        file: ci/ci/pipelines/bosh-os-images/tasks/build-ubuntu-centos.yml
+        file: ci/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      centos
@@ -242,7 +242,7 @@ resources:
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
-  
+
   - name: s3.openstack-kvm-ubuntu-trusty-raw
     type: s3
     source:
@@ -250,7 +250,7 @@ resources:
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1      
+      region_name: eu-central-1
 
   - name: docker.ubuntu-os-image
     type: docker-image
@@ -276,7 +276,7 @@ resources:
     type: s3
     source:
       bucket: concourse-bosh-image
-      regexp: bosh-centos-7-(.+).tgz      
+      regexp: bosh-centos-7-(.+).tgz
       versioned_file: bosh-centos-7-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -298,7 +298,7 @@ resources:
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1      
+      region_name: eu-central-1
 
   #
   # opensuse
@@ -308,7 +308,7 @@ resources:
     type: s3
     source:
       bucket: concourse-bosh-image
-      regexp: bosh-opensuse-leap-(.+).tgz      
+      regexp: bosh-opensuse-leap-(.+).tgz
       versioned_file: bosh-opensuse-leap-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -330,7 +330,7 @@ resources:
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1      
+      region_name: eu-central-1
 
   - name: docker.opensuse-os-image
     type: docker-image

@@ -15,4 +15,4 @@ outputs:
 - name: versioned-fissile-stemcell-opensuse
 
 run:
-  path: ci/ci/pipelines/bosh-os-images/tasks/setup-opensuse-stemcell-versions.sh
+  path: ci/tasks/setup-opensuse-stemcell-versions.sh
