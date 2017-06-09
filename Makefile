@@ -3,7 +3,7 @@ CONCOURSE_URL ?= https://ci.from-the.cloud/
 GITHUB_ID ?= c29a4757ff0e43c25610
 GITHUB_TEAM ?= 'SUSE/Team Alfred'
 
-all: pipeline-master
+all: pipeline-master pipeline-check
 
 login-vancouver:
 	fly -t vancouver login  --concourse-url https://ci.from-the.cloud
@@ -14,3 +14,7 @@ login-sandbox:
 pipeline-master:
 	yes | fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-master.yml -p stemcells-master -l ../cloudfoundry/secure/concourse-secrets.yml
 	fly -t ${TARGET} unpause-pipeline -p stemcells-master
+
+pipeline-check:
+	yes | fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-check.yml -p stemcells-check -l ../cloudfoundry/secure/concourse-secrets.yml
+	fly -t ${TARGET} unpause-pipeline -p stemcells-check
