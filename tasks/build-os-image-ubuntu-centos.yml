@@ -14,7 +14,7 @@ outputs:
 - name: os-image
 
 run:
-  path: ci/tasks/build-ubuntu-centos.sh
+  path: ci/tasks/build-os-image-ubuntu-centos.sh
 
 params:
   OPERATING_SYSTEM_NAME:      replace-me

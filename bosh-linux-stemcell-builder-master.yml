@@ -38,7 +38,7 @@ jobs:
       - put: semver.ubuntu-stemcell
         params:
           bump: minor
-      - task: build-ubuntu-centos
+      - task: build-os-image
         file: ci/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
         params:
@@ -162,7 +162,7 @@ jobs:
         trigger: true
         passed:
           - start-job
-      - task: build-ubuntu-centos
+      - task: build-os-image
         file: ci/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
         params:
@@ -247,7 +247,7 @@ jobs:
             resource: s3.ubuntu-trusty-os-image
             passed: [build-os-image-ubuntu-trusty]
       - task: build
-        file: ci/tasks/build.yml
+        file: ci/tasks/build-stemcell.yml
         privileged: true
         params:
           IAAS:       openstack
@@ -280,7 +280,7 @@ jobs:
             resource: s3.centos-7-os-image
             passed: [build-os-image-centos-7]
       - task: build
-        file: ci/tasks/build.yml
+        file: ci/tasks/build-stemcell.yml
         privileged: true
         params:
           IAAS:       openstack
@@ -314,7 +314,7 @@ jobs:
             resource: s3.opensuse-leap-os-image
             passed: [build-os-image-opensuse-leap]
       - task: build
-        file: ci/tasks/build.yml
+        file: ci/tasks/build-stemcell.yml
         privileged: true
         params:
           IAAS:       openstack
@@ -393,7 +393,6 @@ resources:
     type: s3
     source:
       bucket: concourse-bosh-image
-      regexp: bosh-ubuntu-trusty-(.+).tgz
       versioned_file: bosh-ubuntu-trusty-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -441,7 +440,6 @@ resources:
     type: s3
     source:
       bucket: concourse-bosh-image
-      regexp: bosh-centos-7-(.+).tgz
       versioned_file: bosh-centos-7-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -473,7 +471,6 @@ resources:
     type: s3
     source:
       bucket: concourse-bosh-image
-      regexp: bosh-opensuse-leap-(.+).tgz
       versioned_file: bosh-opensuse-leap-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
