@@ -87,7 +87,7 @@ jobs:
           acl: public-read
       - put: docker.ubuntu-os-image
         params:
-          tag_prefix: "ci-trusty-"
+          tag_prefix: "trusty-"
           tag: semver.ubuntu-stemcell/number
           import_file: os-image/ubuntu-trusty.tgz
         get_params:
@@ -110,6 +110,9 @@ jobs:
   - name: build-fissile-stemcell-ubuntu-trusty
     plan:
       - get: ci
+        passed:
+          - start-job
+      - get: src
         passed:
           - start-job
       - get: docker.ubuntu-os-image
@@ -179,7 +182,7 @@ jobs:
         inputs:
           - name: semver.opensuse-stemcell
         params:
-          tag_prefix: "ci-42.2-"
+          tag_prefix: "42.2-"
           tag: semver.opensuse-stemcell/number
           import_file: os-image/opensuse-leap.tgz
         get_params:
@@ -209,6 +212,9 @@ jobs:
       - get: ci
         passed:
           - build-os-image-opensuse-leap
+      - get: src
+        passed:
+          - start-job
       - get: docker.opensuse-os-image
         trigger: true
         passed:
@@ -307,7 +313,7 @@ jobs:
           HYPERVISOR: kvm
           OS_NAME:    ubuntu
           OS_VERSION: trusty
-          OS_IMAGE_BUCKET: concourse-bosh-image
+          OS_IMAGE_BUCKET: concourse-ci-bosh-image
       - aggregate:
         - put: s3.openstack-kvm-ubuntu-trusty-raw
           params:
@@ -354,7 +360,7 @@ jobs:
           HYPERVISOR: kvm
           OS_NAME:    centos
           OS_VERSION: 7
-          OS_IMAGE_BUCKET: concourse-bosh-image
+          OS_IMAGE_BUCKET: concourse-ci-bosh-image
       - aggregate:
         - put: s3.openstack-kvm-centos-7-raw
           params:
@@ -402,7 +408,7 @@ jobs:
           HYPERVISOR: kvm
           OS_NAME:    opensuse
           OS_VERSION: leap
-          OS_IMAGE_BUCKET: concourse-bosh-image
+          OS_IMAGE_BUCKET: concourse-ci-bosh-image
       - aggregate:
         - put: s3.openstack-kvm-opensuse-leap-raw
           params:
@@ -469,7 +475,7 @@ resources:
     source:
       driver: s3
       key: bosh-stemcell/version
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
@@ -480,7 +486,7 @@ resources:
   - name: s3.ubuntu-trusty-os-image
     type: s3
     source:
-      bucket: concourse-bosh-image
+      bucket: concourse-ci-bosh-image
       versioned_file: bosh-ubuntu-trusty-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -489,7 +495,7 @@ resources:
   - name: s3.openstack-kvm-ubuntu-trusty
     type: s3
     source:
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -498,7 +504,7 @@ resources:
   - name: s3.openstack-kvm-ubuntu-trusty-raw
     type: s3
     source:
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -507,7 +513,7 @@ resources:
   - name: docker.ubuntu-os-image
     type: docker-image
     source:
-      repository: splatform/os-image-ubuntu
+      repository: splatform/ci-os-image-ubuntu
       tag: trusty
       username: {{docker-username}}
       password: {{docker-password}}
@@ -515,7 +521,7 @@ resources:
   - name: docker.fissile-stemcell-ubuntu
     type: docker-image
     source:
-      repository: splatform/fissile-stemcell-ubuntu
+      repository: splatform/ci-fissile-stemcell-ubuntu
       tag: trusty
       username: {{docker-username}}
       password: {{docker-password}}
@@ -527,7 +533,7 @@ resources:
   - name: s3.centos-7-os-image
     type: s3
     source:
-      bucket: concourse-bosh-image
+      bucket: concourse-ci-bosh-image
       versioned_file: bosh-centos-7-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -536,7 +542,7 @@ resources:
   - name: s3.openstack-kvm-centos-7
     type: s3
     source:
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -545,7 +551,7 @@ resources:
   - name: s3.openstack-kvm-centos-7-raw
     type: s3
     source:
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -558,7 +564,7 @@ resources:
   - name: s3.opensuse-leap-os-image
     type: s3
     source:
-      bucket: concourse-bosh-image
+      bucket: concourse-ci-bosh-image
       versioned_file: bosh-opensuse-leap-os-image.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -567,7 +573,7 @@ resources:
   - name: s3.openstack-kvm-opensuse-leap
     type: s3
     source:
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -576,7 +582,7 @@ resources:
   - name: s3.openstack-kvm-opensuse-leap-raw
     type: s3
     source:
-      bucket: concourse-bosh-stemcell
+      bucket: concourse-ci-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
@@ -585,7 +591,7 @@ resources:
   - name: docker.opensuse-os-image
     type: docker-image
     source:
-      repository: splatform/os-image-opensuse
+      repository: splatform/ci-os-image-opensuse
       tag: "latest"
       username: {{docker-username}}
       password: {{docker-password}}
@@ -593,7 +599,7 @@ resources:
   - name: docker.fissile-stemcell-opensuse
     type: docker-image
     source:
-      repository: splatform/fissile-stemcell-opensuse
+      repository: splatform/ci-fissile-stemcell-opensuse
       tag: "42.2"
       username: {{docker-username}}
       password: {{docker-password}}
