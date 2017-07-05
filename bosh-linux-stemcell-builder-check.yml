@@ -1,10 +1,5 @@
 ---
 resource_types:
-  - name: docker-open-build-service-resource
-    type: docker-image
-    source:
-      repository: machinerytool/concourse-open-build-service-resource
-      tag: latest
   - name: pull-request
     type: docker-image
     source:
@@ -165,7 +160,6 @@ jobs:
           params:
             pre: "ci"
             bump: minor
-        - get: obs.fissile_base_image
       - task: build
         file: ci/tasks/build-os-image-opensuse.yml
         privileged: true
@@ -187,10 +181,6 @@ jobs:
           import_file: os-image/opensuse-leap.tgz
         get_params:
           skip_download: true
-      - put: obs.fissile_base_image
-        params:
-          from: obs.fissile_base_image-output
-          commit: { message: "latest build" }
     on_failure:
       put: status
       params:
@@ -603,14 +593,6 @@ resources:
       tag: "42.2"
       username: {{docker-username}}
       password: {{docker-password}}
-
-  - name: obs.fissile_base_image
-    type: docker-open-build-service-resource
-    source:
-      project: home:DKarakasilis
-      package: fissile_base_image
-      username: {{obs-username}}
-      password: {{obs-password}}
 
   #
   # bosh releases
