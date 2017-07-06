@@ -16,3 +16,6 @@ outputs:
 
 run:
   path: ci/tasks/setup-ubuntu-stemcell-versions.sh
+
+params:
+  DOCKER_REPOSITORY: replace-me

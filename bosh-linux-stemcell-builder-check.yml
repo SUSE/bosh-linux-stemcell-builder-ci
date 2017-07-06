@@ -56,7 +56,6 @@ jobs:
           bump: major
 
   - name: build-os-image-ubuntu-trusty
-    serial_groups: [builds]
     plan:
       - get: src
         trigger: true
@@ -120,6 +119,8 @@ jobs:
           - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
+        params:
+          - DOCKER_REPOSITORY: ci-os-image-ubuntu
       - put: docker.fissile-stemcell-ubuntu
         inputs:
           - name: semver.ubuntu-stemcell
@@ -145,7 +146,6 @@ jobs:
         state: success
 
   - name: build-os-image-opensuse-leap
-    serial_groups: [builds]
     plan:
       - aggregate:
         - get: src
@@ -166,8 +166,6 @@ jobs:
         params:
           OPERATING_SYSTEM_NAME:      opensuse
           OPERATING_SYSTEM_VERSION:   leap
-      - task: prepare-osc
-        file: ci/tasks/prepare-osc.yml
       - put: s3.opensuse-leap-os-image
         params:
           file: os-image/opensuse-leap.tgz
@@ -215,6 +213,8 @@ jobs:
           - build-os-image-opensuse-leap
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
+        params:
+          - DOCKER_REPOSITORY: ci-os-image-opensuse
       - put: docker.fissile-stemcell-opensuse
         inputs:
           - name: semver.opensuse-stemcell-opensuse
@@ -240,7 +240,6 @@ jobs:
         state: success
 
   - name: build-os-image-centos-7
-    serial_groups: [builds]
     plan:
       - get: src
         trigger: true
@@ -280,7 +279,6 @@ jobs:
   #
 
   - name: build-openstack-kvm-ubuntu-trusty
-    serial_groups: [builds]
     plan:
       - aggregate:
           - get: semver.bosh-stemcell
@@ -327,7 +325,6 @@ jobs:
         state: success
 
   - name: build-openstack-kvm-centos-7
-    serial_groups: [builds]
     plan:
       - aggregate:
           - get: semver.bosh-stemcell
@@ -375,7 +372,6 @@ jobs:
 
 
   - name: build-openstack-kvm-opensuse-leap
-    serial_groups: [builds]
     plan:
       - aggregate:
           - get: semver.bosh-stemcell
