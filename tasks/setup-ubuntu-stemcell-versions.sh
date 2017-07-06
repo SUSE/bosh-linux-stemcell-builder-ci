@@ -60,5 +60,5 @@ STEMCELL_VERSION=${ARTIFACT_VERSION}-${OS_IMAGE_VERSION_STRIPPED}
 
 set +o errexit +o nounset +o xtrace
 
-sed -i "s@FROM splatform/os-image-ubuntu:trusty@FROM splatform/os-image-ubuntu:trusty-$OS_IMAGE_VERSION@" Dockerfile
+sed -i "s@FROM splatform/os-image-ubuntu:trusty@FROM splatform/$DOCKER_REPOSITORY:trusty-$OS_IMAGE_VERSION@" Dockerfile
 echo $STEMCELL_VERSION > VERSION
