@@ -612,7 +612,7 @@ resources:
         access_token: {{github-access-token}}
         branch: opensuse_stemcell_with_patched_go_agent
         private_key: {{github-private-key}}
-        uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
+        uri: https://github.com/SUSE/bosh-linux-stemcell-builder.git
 
   - name: status
     type: status
