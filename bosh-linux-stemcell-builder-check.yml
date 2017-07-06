@@ -104,6 +104,8 @@ jobs:
   - name: build-fissile-stemcell-ubuntu-trusty
     plan:
       - get: ci
+        passed:
+          - build-os-image-ubuntu-trusty
       - get: src
         passed:
           - build-os-image-ubuntu-trusty
