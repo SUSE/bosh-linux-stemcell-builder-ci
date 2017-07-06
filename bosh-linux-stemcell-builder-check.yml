@@ -50,10 +50,10 @@ jobs:
           path: src
       - get: ci
       - get: bosh-io-release.bosh
-      - get: semver.bosh-stemcell
+      - put: semver.bosh-stemcell
         params:
           pre: "ci"
-          bump: major
+          bump: minor
 
   - name: build-os-image-ubuntu-trusty
     plan:
@@ -65,7 +65,7 @@ jobs:
         trigger: true
         passed:
           - start-job
-      - get: semver.ubuntu-stemcell
+      - put: semver.ubuntu-stemcell
         params:
           pre: "ci"
           bump: minor
@@ -104,8 +104,6 @@ jobs:
   - name: build-fissile-stemcell-ubuntu-trusty
     plan:
       - get: ci
-        passed:
-          - start-job
       - get: src
         passed:
           - start-job
@@ -156,7 +154,7 @@ jobs:
           trigger: true
           passed:
             - start-job
-        - get: semver.opensuse-stemcell
+        - put: semver.opensuse-stemcell
           params:
             pre: "ci"
             bump: minor
@@ -441,30 +439,31 @@ resources:
     type: semver
     source:
       driver: git
-      uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
-      branch: opensuse_stemcell_version
-      file: version
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
+      branch: ci_versions
+      file: opensuse_stemcell_version
       private_key: {{github-private-key}}
+      initial_version: 0.0.0
 
   - name: semver.ubuntu-stemcell
     type: semver
     source:
       driver: git
-      uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
-      branch: ubuntu_stemcell_version
-      file: version
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
+      branch: ci_versions
+      file: ubuntu_stemcell_version
       private_key: {{github-private-key}}
-      initial_version: 1.0.0
+      initial_version: 0.0.0
 
   - name: semver.bosh-stemcell
     type: semver
     source:
-      driver: s3
-      key: bosh-stemcell/version
-      bucket: concourse-ci-bosh-stemcell
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
+      driver: git
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
+      branch: ci_versions
+      file: bosh_stemcell_version
+      private_key: {{github-private-key}}
+      initial_version: 0.0.0
   #
   # ubuntu-trusty
   #
