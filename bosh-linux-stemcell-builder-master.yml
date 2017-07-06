@@ -143,6 +143,8 @@ jobs:
           - build-os-image-opensuse-leap
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
+        input_mapping:
+          - src: git.fissile-stemcell-opensuse
         params:
           - DOCKER_REPOSITORY: os-image-opensuse
       - put: docker.fissile-stemcell-opensuse
