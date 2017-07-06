@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: concourse/git-resource
+
+inputs:
+- name: ci
+- name: semver.os-image-ubuntu
+- name: git.fissile-stemcell-ubuntu
+
+outputs:
+- name: versioned-fissile-stemcell-ubuntu
+
+run:
+  path: ci/tasks/setup-ubuntu-stemcell-versions.sh
+
+params:
+  DOCKER_REPOSITORY: replace-me

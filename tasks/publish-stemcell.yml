@@ -1,0 +1,26 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: boshcpi/aws-cpi-release
+
+inputs:
+  - name: src
+  - name: ci
+  - name: semver.bosh-stemcell
+outputs:
+  - name: version-tag
+
+run:
+  path: ci/tasks/publish-stemcell.sh
+
+params:
+  AWS_ACCESS_KEY_ID:     required
+  AWS_SECRET_ACCESS_KEY: required
+  AWS_DEFAULT_REGION:    us-east-1
+  BUCKET_NAME:           required
+  CANDIDATE_PREFIX:      required
+  PUBLISHED_PREFIX:      required
+  COPY_KEYS:             required

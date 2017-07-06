@@ -1,0 +1,618 @@
+---
+resource_types:
+  - name: pull-request
+    type: docker-image
+    source:
+      repository: splatform/concourse-github-pull-request
+  - name: status
+    type: docker-image
+    source:
+      repository: aduffeck/concourse-github-status
+      tag: 0.0.13
+
+jobs:
+  #
+  # Pipeline won't automatically build if src changes, need to
+  # run start-job manually first to unblock the resource
+  #
+  - name: start-job
+    serial: true
+    plan:
+      - get: src
+        trigger: true
+      - put: status
+        params:
+          statuses:
+          - context: os-images/opensuse
+            description: build opensuse os image
+            state: pending
+          - context: os-images/ubuntu
+            description: build ubuntu os image
+            state: pending
+          - context: os-images/centos
+            description: build centos os image
+            state: pending
+          - context: fissile-stemcells/opensuse
+            description: build opensuse fissile stemcell
+            state: pending
+          - context: fissile-stemcells/ubuntu
+            description: build ubuntu fissile stemcell
+            state: pending
+          - context: bosh-openstack-stemcells/opensuse
+            description: build opensuse openstack stemcell
+            state: pending
+          - context: bosh-openstack-stemcells/ubuntu
+            description: build ubuntu openstack stemcell
+            state: pending
+          - context: bosh-openstack-stemcells/centos
+            description: build centos openstack stemcell
+            state: pending
+          path: src
+      - get: ci
+      - get: bosh-io-release.bosh
+      - put: semver.bosh-stemcell
+        params:
+          pre: "ci"
+          bump: minor
+
+  - name: build-os-image-ubuntu-trusty
+    plan:
+      - get: src
+        trigger: true
+        passed:
+          - start-job
+      - get: ci
+        trigger: true
+        passed:
+          - start-job
+      - put: semver.os-image-ubuntu
+        params:
+          pre: "ci"
+          bump: minor
+      - task: build-os-image
+        file: ci/tasks/build-os-image-ubuntu-centos.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      ubuntu
+          OPERATING_SYSTEM_VERSION:   trusty
+      - put: s3.ubuntu-trusty-os-image
+        params:
+          file: os-image/ubuntu-trusty.tgz
+          acl: public-read
+      - put: docker.ubuntu-os-image
+        params:
+          tag_prefix: "trusty-"
+          tag: semver.os-image-ubuntu/number
+          import_file: os-image/ubuntu-trusty.tgz
+        get_params:
+          skip_download: true
+    on_failure:
+      put: status
+      params:
+        context: os-images/ubuntu
+        description: build ubuntu os image
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: os-images/ubuntu
+        description: build ubuntu os image
+        path: src
+        state: success
+
+  - name: build-fissile-stemcell-ubuntu-trusty
+    plan:
+      - get: ci
+        passed:
+          - build-os-image-ubuntu-trusty
+      - get: src
+        passed:
+          - build-os-image-ubuntu-trusty
+      - get: docker.ubuntu-os-image
+        trigger: true
+        passed:
+          - build-os-image-ubuntu-trusty
+      - get: git.fissile-stemcell-ubuntu
+      - get: semver.os-image-ubuntu
+        passed:
+          - build-os-image-ubuntu-trusty
+      - task: setup-ubuntu-stemcell-versions
+        file: ci/tasks/setup-ubuntu-stemcell-versions.yml
+        params:
+          - DOCKER_REPOSITORY: ci-os-image-ubuntu
+      - put: docker.fissile-stemcell-ubuntu
+        inputs:
+          - name: semver.os-image-ubuntu
+          - name: versioned-fissile-stemcell-ubuntu
+        params:
+          build: versioned-fissile-stemcell-ubuntu
+          tag: versioned-fissile-stemcell-ubuntu/VERSION
+        get_params:
+          skip_download: true
+    on_failure:
+      put: status
+      params:
+        context: fissile-stemcells/ubuntu
+        description: build ubuntu fissile stemcell
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: fissile-stemcells/ubuntu
+        description: build ubuntu fissile stemcell
+        path: src
+        state: success
+
+  - name: build-os-image-opensuse-leap
+    plan:
+      - aggregate:
+        - get: src
+          trigger: true
+          passed:
+            - start-job
+        - get: ci
+          trigger: true
+          passed:
+            - start-job
+        - put: semver.os-image-opensuse
+          params:
+            pre: "ci"
+            bump: minor
+      - task: build
+        file: ci/tasks/build-os-image-opensuse.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      opensuse
+          OPERATING_SYSTEM_VERSION:   leap
+      - put: s3.opensuse-leap-os-image
+        params:
+          file: os-image/opensuse-leap.tgz
+          acl: public-read
+      - put: docker.opensuse-os-image
+        inputs:
+          - name: semver.os-image-opensuse
+        params:
+          tag_prefix: "42.2-"
+          tag: semver.os-image-opensuse/number
+          import_file: os-image/opensuse-leap.tgz
+        get_params:
+          skip_download: true
+    on_failure:
+      put: status
+      params:
+        context: os-images/opensuse
+        description: build opensuse os image
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: os-images/opensuse
+        description: build opensuse os image
+        path: src
+        state: success
+
+
+  - name: build-fissile-stemcell-opensuse-leap
+    plan:
+      - get: ci
+        passed:
+          - build-os-image-opensuse-leap
+      - get: src
+        passed:
+          - build-os-image-opensuse-leap
+      - get: docker.opensuse-os-image
+        trigger: true
+        passed:
+          - build-os-image-opensuse-leap
+      - get: git.fissile-stemcell-opensuse
+      - get: semver.os-image-opensuse
+        passed:
+          - build-os-image-opensuse-leap
+      - task: setup-opensuse-stemcell-versions
+        file: ci/tasks/setup-opensuse-stemcell-versions.yml
+        params:
+          - DOCKER_REPOSITORY: ci-os-image-opensuse
+      - put: docker.fissile-stemcell-opensuse
+        inputs:
+          - name: semver.os-image-opensuse
+          - name: versioned-fissile-stemcell
+        params:
+          build: versioned-fissile-stemcell-opensuse
+          tag: versioned-fissile-stemcell-opensuse/VERSION
+        get_params:
+          skip_download: true
+    on_failure:
+      put: status
+      params:
+        context: fissile-stemcells/opensuse
+        description: build opensuse fissile stemcell
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: fissile-stemcells/opensuse
+        description: build opensuse fissile stemcell
+        path: src
+        state: success
+
+  - name: build-os-image-centos-7
+    plan:
+      - get: src
+        trigger: true
+        passed:
+          - start-job
+      - get: ci
+        trigger: true
+        passed:
+          - start-job
+      - task: build-os-image
+        file: ci/tasks/build-os-image-ubuntu-centos.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      centos
+          OPERATING_SYSTEM_VERSION:   7
+      - put: s3.centos-7-os-image
+        params:
+          file: os-image/centos-7.tgz
+          acl: public-read
+    on_failure:
+      put: status
+      params:
+        context: os-images/centos
+        description: build centos os image
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: os-images/centos
+        description: build centos os image
+        path: src
+        state: success
+
+  #
+  # openstack
+  #
+
+  - name: build-openstack-kvm-ubuntu-trusty
+    plan:
+      - aggregate:
+          - get: semver.bosh-stemcell
+            passed: [start-job]
+          - get: ci
+            passed: [build-os-image-ubuntu-trusty]
+          - get: src
+            passed: [build-os-image-ubuntu-trusty]
+          - get: bosh-io-release.bosh
+            passed: [start-job]
+          - get: os-image
+            resource: s3.ubuntu-trusty-os-image
+            passed: [build-os-image-ubuntu-trusty]
+      - task: build
+        file: ci/tasks/build-stemcell.yml
+        privileged: true
+        params:
+          IAAS:       openstack
+          HYPERVISOR: kvm
+          OS_NAME:    ubuntu
+          OS_VERSION: trusty
+          OS_IMAGE_BUCKET: concourse-ci-bosh-image
+      - aggregate:
+        - put: s3.openstack-kvm-ubuntu-trusty-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: s3.openstack-kvm-ubuntu-trusty
+          params:
+            file: stemcell/*-go_agent.tgz
+    on_failure:
+      put: status
+      params:
+        context: bosh-openstack-stemcells/ubuntu
+        description: build ubuntu openstack stemcell
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: bosh-openstack-stemcells/ubuntu
+        description: build ubuntu openstack stemcell
+        path: src
+        state: success
+
+  - name: build-openstack-kvm-centos-7
+    plan:
+      - aggregate:
+          - get: semver.bosh-stemcell
+            passed: [start-job]
+          - get: ci
+            passed: [build-os-image-centos-7]
+          - get: src
+            passed: [build-os-image-centos-7]
+          - get: bosh-io-release.bosh
+            passed: [start-job]
+          - get: os-image
+            resource: s3.centos-7-os-image
+            passed: [build-os-image-centos-7]
+      - task: build
+        file: ci/tasks/build-stemcell.yml
+        privileged: true
+        params:
+          IAAS:       openstack
+          HYPERVISOR: kvm
+          OS_NAME:    centos
+          OS_VERSION: 7
+          OS_IMAGE_BUCKET: concourse-ci-bosh-image
+      - aggregate:
+        - put: s3.openstack-kvm-centos-7-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: s3.openstack-kvm-centos-7
+          params:
+            file: stemcell/*-go_agent.tgz
+    on_failure:
+      put: status
+      params:
+        context: bosh-openstack-stemcells/centos
+        description: build centos openstack stemcell
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: bosh-openstack-stemcells/centos
+        description: build centos openstack stemcell
+        path: src
+        state: success
+
+
+  - name: build-openstack-kvm-opensuse-leap
+    plan:
+      - aggregate:
+          - get: semver.bosh-stemcell
+            passed: [start-job]
+          - get: ci
+            passed: [build-os-image-opensuse-leap]
+          - get: src
+            passed: [build-os-image-opensuse-leap]
+          - get: bosh-io-release.bosh
+            passed: [start-job]
+          - get: os-image
+            resource: s3.opensuse-leap-os-image
+            passed: [build-os-image-opensuse-leap]
+      - task: build
+        file: ci/tasks/build-stemcell.yml
+        privileged: true
+        params:
+          IAAS:       openstack
+          HYPERVISOR: kvm
+          OS_NAME:    opensuse
+          OS_VERSION: leap
+          OS_IMAGE_BUCKET: concourse-ci-bosh-image
+      - aggregate:
+        - put: s3.openstack-kvm-opensuse-leap-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: s3.openstack-kvm-opensuse-leap
+          params:
+            file: stemcell/*-go_agent.tgz
+    on_failure:
+      put: status
+      params:
+        context: bosh-openstack-stemcells/opensuse
+        description: build opensuse openstack stemcell
+        path: src
+        state: failure
+    on_success:
+      put: status
+      params:
+        context: bosh-openstack-stemcells/opensuse
+        description: build opensuse openstack stemcell
+        path: src
+        state: success
+
+resources:
+  - name: ci
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
+      branch: initial_pipeline
+      private_key: {{github-private-key}}
+
+  - name: git.fissile-stemcell-opensuse
+    type: git
+    source:
+      uri: https://github.com/SUSE/fissile-stemcell-opensuse.git
+      branch: 42.2
+
+  - name: git.fissile-stemcell-ubuntu
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-community/fissile-stemcell-ubuntu.git
+      branch: trusty
+
+  - name: semver.os-image-opensuse
+    type: semver
+    source:
+      driver: s3
+      key: os-image-opensuse-leap-version
+      bucket: concourse-ci-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+    initial_version: 0.0.0
+
+  - name: semver.os-image-ubuntu
+    type: semver
+    source:
+      driver: s3
+      key: os-image-ubuntu-trusty-version
+      bucket: concourse-ci-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+    initial_version: 0.0.0
+
+  - name: semver.bosh-stemcell
+    type: semver
+    source:
+      driver: s3
+      key: bosh-stemcell/version
+      bucket: concourse-ci-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+    initial_version: 0.0.0
+
+  #
+  # ubuntu-trusty
+  #
+
+  - name: s3.ubuntu-trusty-os-image
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-image
+      versioned_file: bosh-ubuntu-trusty-os-image.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-ubuntu-trusty
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-ubuntu-trusty-raw
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: docker.ubuntu-os-image
+    type: docker-image
+    source:
+      repository: splatform/ci-os-image-ubuntu
+      tag: trusty
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.fissile-stemcell-ubuntu
+    type: docker-image
+    source:
+      repository: splatform/ci-fissile-stemcell-ubuntu
+      tag: trusty
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  #
+  # centos-7
+  #
+
+  - name: s3.centos-7-os-image
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-image
+      versioned_file: bosh-centos-7-os-image.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-centos-7
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-centos-7-raw
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent-raw.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  #
+  # opensuse
+  #
+
+  - name: s3.opensuse-leap-os-image
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-image
+      versioned_file: bosh-opensuse-leap-os-image.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-opensuse-leap
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.openstack-kvm-opensuse-leap-raw
+    type: s3
+    source:
+      bucket: concourse-ci-bosh-stemcell
+      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent-raw.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: docker.opensuse-os-image
+    type: docker-image
+    source:
+      repository: splatform/ci-os-image-opensuse
+      tag: "latest"
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.fissile-stemcell-opensuse
+    type: docker-image
+    source:
+      repository: splatform/ci-fissile-stemcell-opensuse
+      tag: "42.2"
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  #
+  # bosh releases
+  #
+  - name: bosh-io-release.bosh
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
+  #
+  # check pr resources
+  #
+  - name: src
+    type: pull-request
+    source:
+        access_token: {{github-access-token}}
+        branch: opensuse_stemcell_with_patched_go_agent
+        private_key: {{github-private-key}}
+        uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
+
+  - name: status
+    type: status
+    source:
+      access_token: {{github-access-token}}
+      repo: SUSE/bosh-linux-stemcell-builder
