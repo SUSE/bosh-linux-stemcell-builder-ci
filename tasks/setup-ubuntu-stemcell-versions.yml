@@ -8,7 +8,7 @@ image_resource:
 
 inputs:
 - name: ci
-- name: semver.ubuntu-stemcell
+- name: semver.os-image-ubuntu
 - name: git.fissile-stemcell-ubuntu
 
 outputs:

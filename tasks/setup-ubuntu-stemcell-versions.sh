@@ -53,8 +53,8 @@ GIT_COMMITS=${GIT_COMMITS:-$(echo ${GIT_DESCRIBE} | awk -F - '{ print $2 }' )}
 GIT_SHA=${GIT_SHA:-$(echo ${GIT_DESCRIBE} | awk -F - '{ print $3 }' )}
 
 ARTIFACT_VERSION=${GIT_TAG}-${GIT_COMMITS}.${GIT_SHA}
-OS_IMAGE_VERSION=$(cat ../semver.ubuntu-stemcell/number)
-OS_IMAGE_VERSION_STRIPPED=$(cat ../semver.ubuntu-stemcell/number | sed 's/\.0$//;s/\.0$//')
+OS_IMAGE_VERSION=$(cat ../semver.os-image-ubuntu/number)
+OS_IMAGE_VERSION_STRIPPED=$(cat ../semver.os-image-ubuntu/number | sed 's/\.0$//;s/\.0$//')
 
 STEMCELL_VERSION=${ARTIFACT_VERSION}-${OS_IMAGE_VERSION_STRIPPED}
 

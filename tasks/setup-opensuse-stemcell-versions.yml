@@ -8,7 +8,7 @@ image_resource:
 
 inputs:
 - name: ci
-- name: semver.opensuse-stemcell
+- name: semver.os-image-opensuse
 - name: git.fissile-stemcell-opensuse
 
 input_mapping:

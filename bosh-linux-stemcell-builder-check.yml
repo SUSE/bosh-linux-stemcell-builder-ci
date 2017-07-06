@@ -65,7 +65,7 @@ jobs:
         trigger: true
         passed:
           - start-job
-      - put: semver.ubuntu-stemcell
+      - put: semver.os-image-ubuntu
         params:
           pre: "ci"
           bump: minor
@@ -82,7 +82,7 @@ jobs:
       - put: docker.ubuntu-os-image
         params:
           tag_prefix: "trusty-"
-          tag: semver.ubuntu-stemcell/number
+          tag: semver.os-image-ubuntu/number
           import_file: os-image/ubuntu-trusty.tgz
         get_params:
           skip_download: true
@@ -112,7 +112,7 @@ jobs:
         passed:
           - build-os-image-ubuntu-trusty
       - get: git.fissile-stemcell-ubuntu
-      - get: semver.ubuntu-stemcell
+      - get: semver.os-image-ubuntu
         passed:
           - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
@@ -121,7 +121,7 @@ jobs:
           - DOCKER_REPOSITORY: ci-os-image-ubuntu
       - put: docker.fissile-stemcell-ubuntu
         inputs:
-          - name: semver.ubuntu-stemcell
+          - name: semver.os-image-ubuntu
           - name: versioned-fissile-stemcell-ubuntu
         params:
           build: versioned-fissile-stemcell-ubuntu
@@ -154,7 +154,7 @@ jobs:
           trigger: true
           passed:
             - start-job
-        - put: semver.opensuse-stemcell
+        - put: semver.os-image-opensuse
           params:
             pre: "ci"
             bump: minor
@@ -170,10 +170,10 @@ jobs:
           acl: public-read
       - put: docker.opensuse-os-image
         inputs:
-          - name: semver.opensuse-stemcell
+          - name: semver.os-image-opensuse
         params:
           tag_prefix: "42.2-"
-          tag: semver.opensuse-stemcell/number
+          tag: semver.os-image-opensuse/number
           import_file: os-image/opensuse-leap.tgz
         get_params:
           skip_download: true
@@ -206,7 +206,7 @@ jobs:
         passed:
           - build-os-image-opensuse-leap
       - get: git.fissile-stemcell-opensuse
-      - get: semver.opensuse-stemcell
+      - get: semver.os-image-opensuse
         passed:
           - build-os-image-opensuse-leap
       - task: setup-opensuse-stemcell-versions
@@ -215,7 +215,7 @@ jobs:
           - DOCKER_REPOSITORY: ci-os-image-opensuse
       - put: docker.fissile-stemcell-opensuse
         inputs:
-          - name: semver.opensuse-stemcell-opensuse
+          - name: semver.os-image-opensuse
           - name: versioned-fissile-stemcell
         params:
           build: versioned-fissile-stemcell-opensuse
@@ -435,35 +435,39 @@ resources:
       uri: https://github.com/cloudfoundry-community/fissile-stemcell-ubuntu.git
       branch: trusty
 
-  - name: semver.opensuse-stemcell
+  - name: semver.os-image-opensuse
     type: semver
     source:
-      driver: git
-      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
-      branch: ci_versions
-      file: opensuse_stemcell_version
-      private_key: {{github-private-key}}
-      initial_version: 0.0.0
+      driver: s3
+      key: os-image-opensuse-leap-version
+      bucket: concourse-ci-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+    initial_version: 0.0.0
 
-  - name: semver.ubuntu-stemcell
+  - name: semver.os-image-ubuntu
     type: semver
     source:
-      driver: git
-      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
-      branch: ci_versions
-      file: ubuntu_stemcell_version
-      private_key: {{github-private-key}}
-      initial_version: 0.0.0
+      driver: s3
+      key: os-image-ubuntu-trusty-version
+      bucket: concourse-ci-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+    initial_version: 0.0.0
 
   - name: semver.bosh-stemcell
     type: semver
     source:
-      driver: git
-      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
-      branch: ci_versions
-      file: bosh_stemcell_version
-      private_key: {{github-private-key}}
-      initial_version: 0.0.0
+      driver: s3
+      key: bosh-stemcell/version
+      bucket: concourse-ci-bosh-stemcell
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+    initial_version: 0.0.0
+
   #
   # ubuntu-trusty
   #
