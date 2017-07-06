@@ -11,6 +11,9 @@ inputs:
 - name: semver.opensuse-stemcell
 - name: git.fissile-stemcell-opensuse
 
+input_mapping:
+- src: git.fissile-stemcell-opensuse
+
 outputs:
 - name: versioned-fissile-stemcell-opensuse
 

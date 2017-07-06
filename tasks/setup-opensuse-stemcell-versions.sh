@@ -40,7 +40,7 @@ test -n "${XTRACE}" && set -o xtrace
 
 set -o errexit -o nounset
 
-cp -r git.fissile-stemcell-opensuse/. versioned-fissile-stemcell-opensuse
+cp -r src/. versioned-fissile-stemcell-opensuse
 cd versioned-fissile-stemcell-opensuse
 git fetch --tags
 
@@ -60,5 +60,5 @@ STEMCELL_VERSION=${ARTIFACT_VERSION}-${OS_IMAGE_VERSION_STRIPPED}
 
 set +o errexit +o nounset +o xtrace
 
-sed -i "s@FROM splatform/os-image-opensuse:42.2@FROM splatform/os-image-opensuse:42.2-$OS_IMAGE_VERSION@" Dockerfile
+sed -i "s@FROM splatform/os-image-opensuse:42.2@FROM splatform/$DOCKER_REPOSITORY:42.2-$OS_IMAGE_VERSION@" Dockerfile
 echo $STEMCELL_VERSION > VERSION
