@@ -106,7 +106,7 @@ jobs:
       - get: ci
       - get: src
         passed:
-          - start-job
+          - build-os-image-ubuntu-trusty
       - get: docker.ubuntu-os-image
         trigger: true
         passed:
@@ -200,7 +200,7 @@ jobs:
           - build-os-image-opensuse-leap
       - get: src
         passed:
-          - start-job
+          - build-os-image-opensuse-leap
       - get: docker.opensuse-os-image
         trigger: true
         passed:
