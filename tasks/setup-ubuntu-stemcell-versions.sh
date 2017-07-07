@@ -40,7 +40,7 @@ test -n "${XTRACE}" && set -o xtrace
 
 set -o errexit -o nounset
 
-cp -r git.fissile-stemcell-ubuntu/. versioned-fissile-stemcell-ubuntu
+cp -r src/. versioned-fissile-stemcell-ubuntu
 cd versioned-fissile-stemcell-ubuntu
 git fetch --tags
 

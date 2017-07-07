@@ -119,6 +119,7 @@ jobs:
           - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
+        input_mapping: { src: git.fissile-stemcell-ubuntu }
         params:
           - DOCKER_REPOSITORY: ci-os-image-ubuntu
       - put: docker.fissile-stemcell-ubuntu
@@ -213,6 +214,7 @@ jobs:
           - build-os-image-opensuse-leap
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
+        input_mapping: { src: git.fissile-stemcell-opensuse }
         params:
           - DOCKER_REPOSITORY: ci-os-image-opensuse
       - put: docker.fissile-stemcell-opensuse
