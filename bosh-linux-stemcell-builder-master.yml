@@ -73,6 +73,8 @@ jobs:
           - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
+        input_mapping:
+          - src: git.fissile-stemcell-ubuntu
         params:
           - DOCKER_REPOSITORY: os-image-ubuntu
       - put: docker.fissile-stemcell-ubuntu
