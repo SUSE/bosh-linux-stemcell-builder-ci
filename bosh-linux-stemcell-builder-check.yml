@@ -84,6 +84,7 @@ jobs:
           tag_prefix: "trusty-"
           tag: semver.os-image-ubuntu/number
           import_file: os-image/ubuntu-trusty.tgz
+          tag_as_latest: true
         get_params:
           skip_download: true
     on_failure:
@@ -178,6 +179,7 @@ jobs:
           tag_prefix: "42.2-"
           tag: semver.os-image-opensuse/number
           import_file: os-image/opensuse-leap.tgz
+          tag_as_latest: true
         get_params:
           skip_download: true
     on_failure:
