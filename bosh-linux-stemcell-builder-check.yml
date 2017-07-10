@@ -7,8 +7,7 @@ resource_types:
   - name: status
     type: docker-image
     source:
-      repository: aduffeck/concourse-github-status
-      tag: 0.0.13
+      repository: splatform/concourse-github-status
 
 jobs:
   #
