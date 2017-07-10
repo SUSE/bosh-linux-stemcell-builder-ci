@@ -27,50 +27,53 @@ jobs:
   - name: build-os-image-ubuntu-trusty
     serial_groups: [builds]
     plan:
-      - get: src
-        trigger: true
-        passed:
-          - start-job
-      - get: ci
-        trigger: true
-        passed:
-          - start-job
-      - put: semver.os-image-ubuntu
-        params:
-          bump: minor
+      - aggregate:
+        - get: src
+          trigger: true
+          passed:
+            - start-job
+        - get: ci
+          trigger: true
+          passed:
+            - start-job
+        - put: semver.os-image-ubuntu
+          params:
+            bump: minor
       - task: build-os-image
         file: ci/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      ubuntu
           OPERATING_SYSTEM_VERSION:   trusty
-      - put: s3.ubuntu-trusty-os-image
-        params:
-          file: os-image/ubuntu-trusty.tgz
-          acl: public-read
-      - put: docker.ubuntu-os-image
-        params:
-          tag_prefix: "trusty-"
-          tag: semver.os-image-ubuntu/number
-          import_file: os-image/ubuntu-trusty.tgz
-          tag_as_latest: true
-        get_params:
-          skip_download: true
+      - aggregate:
+        - put: s3.ubuntu-trusty-os-image
+          params:
+            file: os-image/ubuntu-trusty.tgz
+            acl: public-read
+        - put: docker.ubuntu-os-image
+          params:
+            tag_prefix: "trusty-"
+            tag: semver.os-image-ubuntu/number
+            import_file: os-image/ubuntu-trusty.tgz
+            tag_as_latest: true
+          get_params:
+            skip_download: true
 
   - name: build-fissile-stemcell-ubuntu-trusty
     plan:
-      - get: ci
-        passed:
-          - start-job
-      - get: docker.ubuntu-os-image
-        trigger: true
-        passed:
-          - build-os-image-ubuntu-trusty
-      - get: git.fissile-stemcell-ubuntu
-        trigger: true
-      - get: semver.os-image-ubuntu
-        passed:
-          - build-os-image-ubuntu-trusty
+      - aggregate:
+        - get: ci
+          passed:
+            - start-job
+        - get: docker.ubuntu-os-image
+          trigger: true
+          passed:
+            - build-os-image-ubuntu-trusty
+        - get: git.fissile-stemcell-ubuntu
+          trigger: true
+        - get: semver.os-image-ubuntu
+          passed:
+            - build-os-image-ubuntu-trusty
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
         input_mapping:
@@ -90,59 +93,63 @@ jobs:
   - name: build-os-image-opensuse-leap
     serial_groups: [builds]
     plan:
-      - get: src
-        trigger: true
-        passed:
-          - start-job
-      - get: ci
-        trigger: true
-        passed:
-          - start-job
-      - get: obs.fissile_base_image
-      - put: semver.os-image-opensuse
-        params:
-          bump: minor
+      - aggregate:
+        - get: src
+          trigger: true
+          passed:
+            - start-job
+        - get: ci
+          trigger: true
+          passed:
+            - start-job
+        - get: obs.fissile_base_image
+        - put: semver.os-image-opensuse
+          params:
+            bump: minor
       - task: build
         file: ci/tasks/build-os-image-opensuse.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      opensuse
           OPERATING_SYSTEM_VERSION:   leap
-      - task: prepare-osc
-        file: ci/tasks/prepare-osc.yml
-      - put: s3.opensuse-leap-os-image
-        params:
-          file: os-image/opensuse-leap.tgz
-          acl: public-read
-      - put: docker.opensuse-os-image
-        inputs:
-          - name: semver.os-image-opensuse
-        params:
-          tag_prefix: "42.2-"
-          tag: semver.os-image-opensuse/number
-          import_file: os-image/opensuse-leap.tgz
-          tag_as_latest: true
-        get_params:
-          skip_download: true
-      - put: obs.fissile_base_image
-        params:
-          from: obs.fissile_base_image-output
-          commit: { message: "latest build" }
+      - aggregate:
+        - put: s3.opensuse-leap-os-image
+          params:
+            file: os-image/opensuse-leap.tgz
+            acl: public-read
+        - put: docker.opensuse-os-image
+          inputs:
+            - name: semver.os-image-opensuse
+          params:
+            tag_prefix: "42.2-"
+            tag: semver.os-image-opensuse/number
+            import_file: os-image/opensuse-leap.tgz
+            tag_as_latest: true
+          get_params:
+            skip_download: true
+        - do:
+          - task: prepare-osc
+            file: ci/tasks/prepare-osc.yml
+          - put: obs.fissile_base_image
+            params:
+              from: obs.fissile_base_image-output
+              commit: { message: "latest build" }
 
   - name: build-fissile-stemcell-opensuse-leap
     plan:
-      - get: ci
-        passed:
-          - build-os-image-opensuse-leap
-      - get: docker.opensuse-os-image
-        trigger: true
-        passed:
-          - build-os-image-opensuse-leap
-      - get: git.fissile-stemcell-opensuse
-        trigger: true
-      - get: semver.os-image-opensuse
-        passed:
-          - build-os-image-opensuse-leap
+      - aggregate:
+        - get: ci
+          passed:
+            - build-os-image-opensuse-leap
+        - get: docker.opensuse-os-image
+          trigger: true
+          passed:
+            - build-os-image-opensuse-leap
+        - get: git.fissile-stemcell-opensuse
+          trigger: true
+        - get: semver.os-image-opensuse
+          passed:
+            - build-os-image-opensuse-leap
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
         input_mapping:
@@ -162,14 +169,15 @@ jobs:
   - name: build-os-image-centos-7
     serial_groups: [builds]
     plan:
-      - get: src
-        trigger: true
-        passed:
-          - start-job
-      - get: ci
-        trigger: true
-        passed:
-          - start-job
+      - aggregate:
+        - get: src
+          trigger: true
+          passed:
+            - start-job
+        - get: ci
+          trigger: true
+          passed:
+            - start-job
       - task: build-os-image
         file: ci/tasks/build-os-image-ubuntu-centos.yml
         privileged: true
@@ -242,18 +250,18 @@ jobs:
     serial_groups: [builds]
     plan:
       - aggregate:
-          - get: semver.bosh-stemcell
-            trigger: true
-            passed: [start-job]
-          - get: ci
-            passed: [build-os-image-ubuntu-trusty]
-          - get: src
-            passed: [build-os-image-ubuntu-trusty]
-          - get: bosh-io-release.bosh
-            passed: [start-job]
-          - get: os-image
-            resource: s3.ubuntu-trusty-os-image
-            passed: [build-os-image-ubuntu-trusty]
+        - get: semver.bosh-stemcell
+          trigger: true
+          passed: [start-job]
+        - get: ci
+          passed: [build-os-image-ubuntu-trusty]
+        - get: src
+          passed: [build-os-image-ubuntu-trusty]
+        - get: bosh-io-release.bosh
+          passed: [start-job]
+        - get: os-image
+          resource: s3.ubuntu-trusty-os-image
+          passed: [build-os-image-ubuntu-trusty]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -275,18 +283,18 @@ jobs:
     serial_groups: [builds]
     plan:
       - aggregate:
-          - get: semver.bosh-stemcell
-            trigger: true
-            passed: [start-job]
-          - get: ci
-            passed: [build-os-image-centos-7]
-          - get: src
-            passed: [build-os-image-centos-7]
-          - get: bosh-io-release.bosh
-            passed: [start-job]
-          - get: os-image
-            resource: s3.centos-7-os-image
-            passed: [build-os-image-centos-7]
+        - get: semver.bosh-stemcell
+          trigger: true
+          passed: [start-job]
+        - get: ci
+          passed: [build-os-image-centos-7]
+        - get: src
+          passed: [build-os-image-centos-7]
+        - get: bosh-io-release.bosh
+          passed: [start-job]
+        - get: os-image
+          resource: s3.centos-7-os-image
+          passed: [build-os-image-centos-7]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -309,18 +317,18 @@ jobs:
     serial_groups: [builds]
     plan:
       - aggregate:
-          - get: semver.bosh-stemcell
-            trigger: true
-            passed: [start-job]
-          - get: ci
-            passed: [build-os-image-opensuse-leap]
-          - get: src
-            passed: [build-os-image-opensuse-leap]
-          - get: bosh-io-release.bosh
-            passed: [start-job]
-          - get: os-image
-            resource: s3.opensuse-leap-os-image
-            passed: [build-os-image-opensuse-leap]
+        - get: semver.bosh-stemcell
+          trigger: true
+          passed: [start-job]
+        - get: ci
+          passed: [build-os-image-opensuse-leap]
+        - get: src
+          passed: [build-os-image-opensuse-leap]
+        - get: bosh-io-release.bosh
+          passed: [start-job]
+        - get: os-image
+          resource: s3.opensuse-leap-os-image
+          passed: [build-os-image-opensuse-leap]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
