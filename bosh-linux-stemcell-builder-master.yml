@@ -189,59 +189,6 @@ jobs:
           file: os-image/centos-7.tgz
           acl: public-read
 
-
-  - name: test-stemcells
-    serial: true
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed:
-            - start-job
-            - build-openstack-kvm-ubuntu-trusty
-            - build-openstack-kvm-centos-7
-            - build-openstack-kvm-opensuse-leap
-        - get: src
-          passed:
-            - start-job
-            - build-openstack-kvm-ubuntu-trusty
-            - build-openstack-kvm-centos-7
-            - build-openstack-kvm-opensuse-leap
-        - get: ci
-          passed:
-            - start-job
-            - build-openstack-kvm-ubuntu-trusty
-            - build-openstack-kvm-centos-7
-            - build-openstack-kvm-opensuse-leap
-        - get: bosh-io-release.syslog-release
-
-  - name: publish-stemcells
-    serial: true
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          trigger: true
-          passed: [test-stemcells]
-        - get: ci
-          passed: [test-stemcells]
-        - get: src
-          passed: [test-stemcells]
-      - task: publish
-        file: ci/tasks/publish.yml
-        params:
-          AWS_ACCESS_KEY_ID: {{aws-access-key}}
-          AWS_DEFAULT_REGION: eu-central-1
-          AWS_SECRET_ACCESS_KEY: {{aws-secret-key}}
-          BUCKET_NAME: concourse-bosh-stemcell
-          CANDIDATE_PREFIX: bosh-stemcell-candidate/
-          PUBLISHED_PREFIX: bosh-stemcell/
-          COPY_KEYS: |
-            openstack/bosh-stemcell-%s-openstack-kvm-ubuntu-trusty-go_agent.tgz
-            openstack/bosh-stemcell-%s-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
-            openstack/bosh-stemcell-%s-openstack-kvm-centos-7-go_agent.tgz
-            openstack/bosh-stemcell-%s-openstack-kvm-centos-7-go_agent-raw.tgz
-            openstack/bosh-stemcell-%s-openstack-kvm-opensuse-leap-go_agent.tgz
-            openstack/bosh-stemcell-%s-openstack-kvm-opensuse-leap-go_agent-raw.tgz
-
   #
   # openstack
   #
@@ -544,8 +491,3 @@ resources:
     type: bosh-io-release
     source:
       repository: cloudfoundry/bosh
-
-  - name: bosh-io-release.syslog-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/syslog-release
