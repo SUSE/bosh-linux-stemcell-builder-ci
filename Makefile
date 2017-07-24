@@ -1,9 +1,12 @@
-TARGET ?= vancouver
-CONCOURSE_URL ?= https://ci.from-the.cloud/
+TARGET ?= skycastle
+CONCOURSE_URL ?= http://concourse.suse.de/
 GITHUB_ID ?= c29a4757ff0e43c25610
 GITHUB_TEAM ?= 'SUSE/Team Alfred'
 
 all: pipeline-master pipeline-check
+
+login:
+	fly -t ${TARGET} login  --concourse-url ${CONCOURSE_URL}
 
 login-vancouver:
 	fly -t vancouver login  --concourse-url https://ci.from-the.cloud
