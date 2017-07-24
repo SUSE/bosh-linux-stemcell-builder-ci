@@ -198,7 +198,6 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          trigger: true
           passed: [start-job]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
@@ -231,7 +230,6 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          trigger: true
           passed: [start-job]
         - get: ci
           passed: [build-os-image-centos-7]
@@ -265,7 +263,6 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          trigger: true
           passed: [start-job]
         - get: ci
           passed: [build-os-image-opensuse-leap]
