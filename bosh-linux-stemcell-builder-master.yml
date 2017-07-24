@@ -207,6 +207,7 @@ jobs:
           passed: [start-job]
         - get: os-image
           resource: s3.ubuntu-trusty-os-image
+          trigger: true
           passed: [build-os-image-ubuntu-trusty]
       - task: build
         file: ci/tasks/build-stemcell.yml
@@ -239,6 +240,7 @@ jobs:
           passed: [start-job]
         - get: os-image
           resource: s3.centos-7-os-image
+          trigger: true
           passed: [build-os-image-centos-7]
       - task: build
         file: ci/tasks/build-stemcell.yml
@@ -272,6 +274,7 @@ jobs:
           passed: [start-job]
         - get: os-image
           resource: s3.opensuse-leap-os-image
+          trigger: true
           passed: [build-os-image-opensuse-leap]
       - task: build
         file: ci/tasks/build-stemcell.yml
