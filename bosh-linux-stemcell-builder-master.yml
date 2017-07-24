@@ -64,7 +64,7 @@ jobs:
       - aggregate:
         - get: ci
           passed:
-            - start-job
+            - build-os-image-ubuntu-trusty
         - get: docker.ubuntu-os-image
           trigger: true
           passed:
