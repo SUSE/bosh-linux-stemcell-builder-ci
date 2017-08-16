@@ -2,6 +2,7 @@ TARGET ?= skycastle
 CONCOURSE_URL ?= http://concourse.suse.de/
 GITHUB_ID ?= c29a4757ff0e43c25610
 GITHUB_TEAM ?= 'SUSE/Team Alfred'
+CONCOURSE_SECRETS_FILE ?= ../cloudfoundry/secure/concourse-secrets.yml.gpg
 
 all: pipeline-master pipeline-check
 
@@ -14,10 +15,8 @@ login-vancouver:
 login-sandbox:
 	fly -t sandbox login  --concourse-url http://192.168.100.4:8080/
 
-pipeline-master:
-	yes | fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-master.yml -p stemcells-master -l ../cloudfoundry/secure/concourse-secrets.yml
-	fly -t ${TARGET} unpause-pipeline -p stemcells-master
-
-pipeline-check:
-	yes | fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-check.yml -p stemcells-check -l ../cloudfoundry/secure/concourse-secrets.yml
-	fly -t ${TARGET} unpause-pipeline -p stemcells-check
+pipeline-%: ${CONCOURSE_SECRETS_FILE}
+	# Explicitly call bash here to get process substitution, otherwise make
+	# runs the shell in a mode that doesn't support <(...)
+	yes | bash -c "fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-$*.yml -p stemcells-$* -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+	fly -t ${TARGET} unpause-pipeline -p stemcells-$*
