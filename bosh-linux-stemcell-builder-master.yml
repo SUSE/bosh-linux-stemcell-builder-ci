@@ -77,13 +77,10 @@ jobs:
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
         input_mapping:
-          - src: git.fissile-stemcell-ubuntu
+          src: git.fissile-stemcell-ubuntu
         params:
-          - DOCKER_REPOSITORY: os-image-ubuntu
+          DOCKER_REPOSITORY: os-image-ubuntu
       - put: docker.fissile-stemcell-ubuntu
-        inputs:
-          - name: semver.os-image-ubuntu
-          - name: versioned-fissile-stemcell-ubuntu
         params:
           build: versioned-fissile-stemcell-ubuntu
           tag: versioned-fissile-stemcell-ubuntu/VERSION
@@ -118,8 +115,6 @@ jobs:
             file: os-image/opensuse-leap.tgz
             acl: public-read
         - put: docker.opensuse-os-image
-          inputs:
-            - name: semver.os-image-opensuse
           params:
             tag_prefix: "42.2-"
             tag: semver.os-image-opensuse/number
@@ -153,13 +148,10 @@ jobs:
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
         input_mapping:
-          - src: git.fissile-stemcell-opensuse
+          src: git.fissile-stemcell-opensuse
         params:
-          - DOCKER_REPOSITORY: os-image-opensuse
+          DOCKER_REPOSITORY: os-image-opensuse
       - put: docker.fissile-stemcell-opensuse
-        inputs:
-          - name: semver.os-image-opensuse-opensuse
-          - name: versioned-fissile-stemcell
         params:
           build: versioned-fissile-stemcell-opensuse
           tag: versioned-fissile-stemcell-opensuse/VERSION
@@ -329,7 +321,7 @@ resources:
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
-    initial_version: 0.0.0
+      initial_version: 0.0.0
 
   - name: semver.os-image-ubuntu
     type: semver
@@ -340,7 +332,7 @@ resources:
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
-    initial_version: 0.0.0
+      initial_version: 0.0.0
 
   - name: semver.bosh-stemcell
     type: semver
