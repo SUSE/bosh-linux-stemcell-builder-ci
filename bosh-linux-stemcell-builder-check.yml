@@ -28,9 +28,6 @@ jobs:
           - context: os-images/ubuntu
             description: build ubuntu os image
             state: pending
-          - context: os-images/centos
-            description: build centos os image
-            state: pending
           - context: fissile-stemcells/opensuse
             description: build opensuse fissile stemcell
             state: pending
@@ -42,9 +39,6 @@ jobs:
             state: pending
           - context: bosh-openstack-stemcells/ubuntu
             description: build ubuntu openstack stemcell
-            state: pending
-          - context: bosh-openstack-stemcells/centos
-            description: build centos openstack stemcell
             state: pending
           path: src
       - get: ci
@@ -249,42 +243,6 @@ jobs:
         path: src
         state: success
 
-  - name: build-os-image-centos-7
-    plan:
-      - aggregate:
-        - get: src
-          trigger: true
-          passed:
-            - start-job
-        - get: ci
-          trigger: true
-          passed:
-            - start-job
-      - task: build-os-image
-        file: ci/tasks/build-os-image-ubuntu-centos.yml
-        privileged: true
-        params:
-          OPERATING_SYSTEM_NAME:      centos
-          OPERATING_SYSTEM_VERSION:   7
-      - put: s3.centos-7-os-image
-        params:
-          file: os-image/centos-7.tgz
-          acl: public-read
-    on_failure:
-      put: status
-      params:
-        context: os-images/centos
-        description: build centos os image
-        path: src
-        state: failure
-    on_success:
-      put: status
-      params:
-        context: os-images/centos
-        description: build centos os image
-        path: src
-        state: success
-
   #
   # openstack
   #
@@ -334,53 +292,6 @@ jobs:
         description: build ubuntu openstack stemcell
         path: src
         state: success
-
-  - name: build-openstack-kvm-centos-7
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed: [start-job]
-        - get: ci
-          passed: [build-os-image-centos-7]
-        - get: src
-          passed: [build-os-image-centos-7]
-        - get: bosh-io-release.bosh
-          passed: [start-job]
-        - get: os-image
-          resource: s3.centos-7-os-image
-          passed: [build-os-image-centos-7]
-          trigger: true
-      - task: build
-        file: ci/tasks/build-stemcell.yml
-        privileged: true
-        params:
-          IAAS:       openstack
-          HYPERVISOR: kvm
-          OS_NAME:    centos
-          OS_VERSION: 7
-          OS_IMAGE_BUCKET: concourse-ci-bosh-image
-      - aggregate:
-        - put: s3.openstack-kvm-centos-7-raw
-          params:
-            file: stemcell/*-raw.tgz
-        - put: s3.openstack-kvm-centos-7
-          params:
-            file: stemcell/*-go_agent.tgz
-    on_failure:
-      put: status
-      params:
-        context: bosh-openstack-stemcells/centos
-        description: build centos openstack stemcell
-        path: src
-        state: failure
-    on_success:
-      put: status
-      params:
-        context: bosh-openstack-stemcells/centos
-        description: build centos openstack stemcell
-        path: src
-        state: success
-
 
   - name: build-openstack-kvm-opensuse-leap
     plan:
@@ -527,37 +438,6 @@ resources:
       tag: trusty
       username: {{docker-username}}
       password: {{docker-password}}
-
-  #
-  # centos-7
-  #
-
-  - name: s3.centos-7-os-image
-    type: s3
-    source:
-      bucket: concourse-ci-bosh-image
-      versioned_file: bosh-centos-7-os-image.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.openstack-kvm-centos-7
-    type: s3
-    source:
-      bucket: concourse-ci-bosh-stemcell
-      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.openstack-kvm-centos-7-raw
-    type: s3
-    source:
-      bucket: concourse-ci-bosh-stemcell
-      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-centos-7-go_agent-raw.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
 
   #
   # opensuse
