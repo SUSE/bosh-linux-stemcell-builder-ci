@@ -1,11 +1,4 @@
 ---
-resource_types:
-  - name: docker-open-build-service-resource
-    type: docker-image
-    source:
-        repository: machinerytool/concourse-open-build-service-resource
-        tag: latest
-
 jobs:
   #
   # Pipeline won't automatically build if src changes, need to
@@ -96,7 +89,6 @@ jobs:
         - get: ci
           passed:
             - start-job
-        - get: obs.fissile_base_image
         - put: semver.os-image-opensuse
           params:
             bump: minor
@@ -119,13 +111,6 @@ jobs:
             tag_as_latest: true
           get_params:
             skip_download: true
-        - do:
-          - task: prepare-osc
-            file: ci/tasks/prepare-osc.yml
-          - put: obs.fissile_base_image
-            params:
-              from: obs.fissile_base_image-output
-              commit: { message: "latest build" }
 
   - name: build-fissile-stemcell-opensuse-leap
     serial_groups: [stemcell]
@@ -561,14 +546,6 @@ resources:
       tag: "42.2"
       username: {{docker-username}}
       password: {{docker-password}}
-
-  - name: obs.fissile_base_image
-    type: docker-open-build-service-resource
-    source:
-      project: home:DKarakasilis
-      package: fissile_base_image
-      username: {{obs-username}}
-      password: {{obs-password}}
 
   #
   # sles
