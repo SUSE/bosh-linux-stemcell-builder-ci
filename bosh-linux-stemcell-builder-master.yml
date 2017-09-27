@@ -60,6 +60,7 @@ jobs:
             skip_download: true
 
   - name: build-fissile-stemcell-ubuntu-trusty
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: ci
@@ -131,6 +132,7 @@ jobs:
               commit: { message: "latest build" }
 
   - name: build-fissile-stemcell-opensuse-leap
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: ci
@@ -191,7 +193,7 @@ jobs:
   #
 
   - name: build-openstack-kvm-ubuntu-trusty
-    serial_groups: [builds]
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -225,7 +227,7 @@ jobs:
 
 
   - name: build-openstack-kvm-opensuse-leap
-    serial_groups: [builds]
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -259,7 +261,7 @@ jobs:
 
 
   - name: build-openstack-kvm-sles-12
-    serial_groups: [builds]
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -296,7 +298,7 @@ jobs:
   #
 
   - name: build-aws-xen-ubuntu-trusty
-    serial_groups: [builds]
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -326,7 +328,7 @@ jobs:
             file: stemcell/*-go_agent.tgz
 
   - name: build-aws-xen-opensuse-leap
-    serial_groups: [builds]
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -357,7 +359,7 @@ jobs:
 
 
   - name: build-aws-xen-sles-12
-    serial_groups: [builds]
+    serial_groups: [stemcell]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
