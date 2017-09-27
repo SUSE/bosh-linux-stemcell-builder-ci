@@ -29,11 +29,9 @@ jobs:
     plan:
       - aggregate:
         - get: src
-          trigger: true
           passed:
             - start-job
         - get: ci
-          trigger: true
           passed:
             - start-job
         - put: semver.os-image-ubuntu
@@ -93,11 +91,9 @@ jobs:
     plan:
       - aggregate:
         - get: src
-          trigger: true
           passed:
             - start-job
         - get: ci
-          trigger: true
           passed:
             - start-job
         - get: obs.fissile_base_image
@@ -165,11 +161,9 @@ jobs:
     plan:
       - aggregate:
         - get: src
-          trigger: true
           passed:
             - start-job
         - get: ci
-          trigger: true
           passed:
             - start-job
         - put: semver.os-image-sles
