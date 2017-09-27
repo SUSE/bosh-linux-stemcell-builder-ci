@@ -366,6 +366,102 @@ jobs:
         - put: s3.aws-xen-sles-12
           params:
             file: stemcell/*-go_agent.tgz
+
+  #
+  # Azure
+  #
+
+  - name: build-azure-hyperv-ubuntu-trusty
+    serial_groups: [stemcell]
+    plan:
+      - aggregate:
+        - get: semver.bosh-stemcell
+          passed: [start-job]
+        - get: ci
+          passed: [build-os-image-ubuntu-trusty]
+        - get: src
+          passed: [build-os-image-ubuntu-trusty]
+        - get: bosh-io-release.bosh
+          passed: [start-job]
+        - get: os-image
+          resource: s3.ubuntu-trusty-os-image
+          trigger: true
+          passed: [build-os-image-ubuntu-trusty]
+      - task: build
+        file: ci/tasks/build-stemcell.yml
+        privileged: true
+        params:
+          IAAS:       azure
+          HYPERVISOR: hyperv
+          OS_NAME:    ubuntu
+          OS_VERSION: trusty
+          OS_IMAGE_BUCKET: concourse-bosh-image
+      - aggregate:
+        - put: s3.azure-hyperv-ubuntu-trusty
+          params:
+            file: stemcell/*-go_agent.tgz
+
+  - name: build-azure-hyperv-opensuse-leap
+    serial_groups: [stemcell]
+    plan:
+      - aggregate:
+        - get: semver.bosh-stemcell
+          passed: [start-job]
+        - get: ci
+          passed: [build-os-image-opensuse-leap]
+        - get: src
+          passed: [build-os-image-opensuse-leap]
+        - get: bosh-io-release.bosh
+          passed: [start-job]
+        - get: os-image
+          resource: s3.opensuse-leap-os-image
+          trigger: true
+          passed: [build-os-image-opensuse-leap]
+      - task: build
+        file: ci/tasks/build-stemcell.yml
+        privileged: true
+        params:
+          IAAS:       azure
+          HYPERVISOR: hyperv
+          OS_NAME:    opensuse
+          OS_VERSION: leap
+          OS_IMAGE_BUCKET: concourse-bosh-image
+      - aggregate:
+        - put: s3.azure-hyperv-opensuse-leap
+          params:
+            file: stemcell/*-go_agent.tgz
+
+
+  - name: build-azure-hyperv-sles-12
+    serial_groups: [stemcell]
+    plan:
+      - aggregate:
+        - get: semver.bosh-stemcell
+          passed: [start-job]
+        - get: ci
+          passed: [build-os-image-sles-12]
+        - get: src
+          passed: [build-os-image-sles-12]
+        - get: bosh-io-release.bosh
+          passed: [start-job]
+        - get: os-image
+          resource: s3.sles-12-os-image
+          trigger: true
+          passed: [build-os-image-sles-12]
+      - task: build
+        file: ci/tasks/build-stemcell.yml
+        privileged: true
+        params:
+          IAAS:       azure
+          HYPERVISOR: hyperv
+          OS_NAME:    sles
+          OS_VERSION: 12
+          OS_IMAGE_BUCKET: concourse-bosh-image
+      - aggregate:
+        - put: s3.azure-hyperv-sles-12
+          params:
+            file: stemcell/*-go_agent.tgz
+
 resources:
   - name: ci
     type: git
@@ -378,7 +474,7 @@ resources:
     type: git
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
-      branch: build_sle_stemcell
+      branch: merged_stemcells
       private_key: {{github-private-key}}
 
   - name: git.fissile-stemcell-opensuse
@@ -475,6 +571,15 @@ resources:
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
+  - name: s3.azure-hyperv-ubuntu-trusty
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/hyperv/bosh-stemcell-(.+)-azure-hyperv-ubuntu-trusty-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
   - name: docker.ubuntu-os-image
     type: docker-image
     source:
@@ -531,6 +636,15 @@ resources:
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
+  - name: s3.azure-hyperv-opensuse-leap
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/hyperv/bosh-stemcell-(.+)-azure-hyperv-opensuse-leap-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
   - name: docker.opensuse-os-image
     type: docker-image
     source:
@@ -583,6 +697,15 @@ resources:
     source:
       bucket: concourse-bosh-stemcell
       regexp: bosh-stemcell-candidate/aws/bosh-stemcell-(.+)-aws-xen-sles-12-go_agent.tgz
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: eu-central-1
+
+  - name: s3.azure-hyperv-sles-12
+    type: s3
+    source:
+      bucket: concourse-bosh-stemcell
+      regexp: bosh-stemcell-candidate/hyperv/bosh-stemcell-(.+)-azure-hyperv-sles-12-go_agent.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
