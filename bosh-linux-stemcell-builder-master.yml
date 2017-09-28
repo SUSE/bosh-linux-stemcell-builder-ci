@@ -197,9 +197,6 @@ jobs:
           OS_VERSION: trusty
           OS_IMAGE_BUCKET: concourse-bosh-image
       - aggregate:
-        - put: s3.openstack-kvm-ubuntu-trusty-raw
-          params:
-            file: stemcell/*-raw.tgz
         - put: s3.openstack-kvm-ubuntu-trusty
           params:
             file: stemcell/*-go_agent.tgz
@@ -231,9 +228,6 @@ jobs:
           OS_VERSION: leap
           OS_IMAGE_BUCKET: concourse-bosh-image
       - aggregate:
-        - put: s3.openstack-kvm-opensuse-leap-raw
-          params:
-            file: stemcell/*-raw.tgz
         - put: s3.openstack-kvm-opensuse-leap
           params:
             file: stemcell/*-go_agent.tgz
@@ -265,9 +259,6 @@ jobs:
           OS_VERSION: 12
           OS_IMAGE_BUCKET: concourse-bosh-image
       - aggregate:
-        - put: s3.openstack-kvm-sles-12-raw
-          params:
-            file: stemcell/*-raw.tgz
         - put: s3.openstack-kvm-sles-12
           params:
             file: stemcell/*-go_agent.tgz
@@ -553,15 +544,6 @@ resources:
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
-  - name: s3.openstack-kvm-ubuntu-trusty-raw
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-ubuntu-trusty-go_agent-raw.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
   - name: s3.aws-xen-ubuntu-trusty
     type: s3
     source:
@@ -618,15 +600,6 @@ resources:
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
 
-  - name: s3.openstack-kvm-opensuse-leap-raw
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent-raw.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
   - name: s3.aws-xen-opensuse-leap
     type: s3
     source:
@@ -679,15 +652,6 @@ resources:
     source:
       bucket: concourse-bosh-stemcell
       regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.openstack-kvm-sles-12-raw
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent-raw.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
