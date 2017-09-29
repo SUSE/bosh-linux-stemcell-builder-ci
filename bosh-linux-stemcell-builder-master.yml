@@ -174,6 +174,35 @@ jobs:
           get_params:
             skip_download: true
 
+  - name: build-fissile-stemcell-sles-12
+    serial_groups: [stemcell]
+    plan:
+      - aggregate:
+        - get: ci
+          passed:
+            - build-os-image-sles-12
+        - get: docker.sles-os-image
+          trigger: true
+          passed:
+            - build-os-image-sles-12
+        - get: git.fissile-stemcell-sles
+          trigger: true
+        - get: semver.os-image-sles
+          passed:
+            - build-os-image-sles-12
+      - task: setup-sles-stemcell-versions
+        file: ci/tasks/setup-sles-stemcell-versions.yml
+        input_mapping:
+          src: git.fissile-stemcell-sles
+        params:
+          DOCKER_REPOSITORY: os-image-sles
+      - put: docker.fissile-stemcell-sles
+        params:
+          build: versioned-fissile-stemcell-sles
+          tag: versioned-fissile-stemcell-sles/VERSION
+        get_params:
+          skip_download: true
+
   #
   # openstack
   #
@@ -674,6 +703,11 @@ resources:
       uri: https://github.com/SUSE/fissile-stemcell-opensuse.git
       branch: 42.2
 
+  - name: git.fissile-stemcell-sles
+    type: git
+    source:
+      uri: https://github.com/thardeck/fissile-stemcell-sles.git
+
   - name: git.fissile-stemcell-ubuntu
     type: git
     source:
@@ -932,6 +966,14 @@ resources:
     type: docker-image
     source:
       repository: columbia.prv.suse.net:443/splatform/os-image-sles
+      username: {{docker-internal-username}}
+      password: {{docker-internal-password}}
+      insecure_registries: [ "columbia.prv.suse.net:443" ]
+
+  - name: docker.fissile-stemcell-sles
+    type: docker-image
+    source:
+      repository: columbia.prv.suse.net:443/splatform/fissile-stemcell-sles
       tag: "latest"
       username: {{docker-internal-username}}
       password: {{docker-internal-password}}
