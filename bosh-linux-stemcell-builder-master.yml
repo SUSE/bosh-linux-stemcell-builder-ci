@@ -165,7 +165,14 @@ jobs:
           params:
             file: os-image/sles-12.tgz
             acl: public-read
-
+        - put: docker.sles-os-image
+          params:
+            tag_prefix: "12-"
+            tag: semver.os-image-sles/number
+            import_file: os-image/sles-12.tgz
+            tag_as_latest: true
+          get_params:
+            skip_download: true
 
   #
   # openstack
@@ -920,6 +927,16 @@ resources:
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
+
+  - name: docker.sles-os-image
+    type: docker-image
+    source:
+      repository: columbia.prv.suse.net:443/splatform/os-image-sles
+      tag: "latest"
+      username: {{docker-internal-username}}
+      password: {{docker-internal-password}}
+      insecure_registries: [ "columbia.prv.suse.net:443" ]
+
   #
   # bosh releases
   #
