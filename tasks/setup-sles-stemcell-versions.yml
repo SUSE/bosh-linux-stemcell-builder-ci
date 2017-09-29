@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: concourse/git-resource
+
+inputs:
+- name: ci
+- name: semver.os-image-sles
+- name: src
+
+outputs:
+- name: versioned-fissile-stemcell-sles
+
+run:
+  path: ci/tasks/setup-sles-stemcell-versions.sh
+
+params:
+  DOCKER_REPOSITORY: replace-me
