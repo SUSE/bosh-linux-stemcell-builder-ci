@@ -894,7 +894,6 @@ resources:
     type: docker-image
     source:
       repository: splatform/os-image-opensuse
-      tag: "latest"
       username: {{docker-username}}
       password: {{docker-password}}
 
@@ -902,7 +901,6 @@ resources:
     type: docker-image
     source:
       repository: splatform/fissile-stemcell-opensuse
-      tag: "42.2"
       username: {{docker-username}}
       password: {{docker-password}}
 
