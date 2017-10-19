@@ -18,7 +18,7 @@ jobs:
           file: semver.bosh-stemcell/number
 
   - name: build-os-image-ubuntu-trusty
-    serial_groups: [os-image]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: src
@@ -51,7 +51,7 @@ jobs:
             skip_download: true
 
   - name: build-fissile-stemcell-ubuntu-trusty
-    serial_groups: [stemcell]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: ci
@@ -80,7 +80,7 @@ jobs:
           skip_download: true
 
   - name: build-os-image-opensuse-leap
-    serial_groups: [os-image]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: src
@@ -113,7 +113,7 @@ jobs:
             skip_download: true
 
   - name: build-fissile-stemcell-opensuse-leap
-    serial_groups: [stemcell]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: ci
@@ -142,7 +142,7 @@ jobs:
           skip_download: true
 
   - name: build-os-image-sles-12
-    serial_groups: [os-image]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: src
@@ -175,7 +175,7 @@ jobs:
             skip_download: true
 
   - name: build-fissile-stemcell-sles-12
-    serial_groups: [stemcell]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: ci
@@ -210,7 +210,7 @@ jobs:
   #
 
   - name: build-openstack-kvm-ubuntu-trusty
-    serial_groups: [stemcell]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -241,7 +241,7 @@ jobs:
 
 
   - name: build-openstack-kvm-opensuse-leap
-    serial_groups: [stemcell]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -272,7 +272,7 @@ jobs:
 
 
   - name: build-openstack-kvm-sles-12
-    serial_groups: [stemcell]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -306,7 +306,7 @@ jobs:
   #
 
   - name: build-aws-xen-ubuntu-trusty
-    serial_groups: [stemcell]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -336,7 +336,7 @@ jobs:
             file: stemcell/*-go_agent.tgz
 
   - name: build-aws-xen-opensuse-leap
-    serial_groups: [stemcell]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -367,7 +367,7 @@ jobs:
 
 
   - name: build-aws-xen-sles-12
-    serial_groups: [stemcell]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -401,7 +401,7 @@ jobs:
   #
 
   - name: build-azure-hyperv-ubuntu-trusty
-    serial_groups: [stemcell]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -431,7 +431,7 @@ jobs:
             file: stemcell/*-go_agent.tgz
 
   - name: build-azure-hyperv-opensuse-leap
-    serial_groups: [stemcell]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -462,7 +462,7 @@ jobs:
 
 
   - name: build-azure-hyperv-sles-12
-    serial_groups: [stemcell]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -497,7 +497,7 @@ jobs:
   #
 
   - name: build-google-kvm-ubuntu-trusty
-    serial_groups: [stemcell]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -528,7 +528,7 @@ jobs:
 
 
   - name: build-google-kvm-opensuse-leap
-    serial_groups: [stemcell]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -559,7 +559,7 @@ jobs:
 
 
   - name: build-google-kvm-sles-12
-    serial_groups: [stemcell]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -593,7 +593,7 @@ jobs:
   #
 
   - name: build-vsphere-esxi-ubuntu-trusty
-    serial_groups: [stemcell]
+    serial_groups: [ubuntu]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -624,7 +624,7 @@ jobs:
 
 
   - name: build-vsphere-esxi-opensuse-leap
-    serial_groups: [stemcell]
+    serial_groups: [opensuse]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
@@ -655,7 +655,7 @@ jobs:
 
 
   - name: build-vsphere-esxi-sles-12
-    serial_groups: [stemcell]
+    serial_groups: [sles]
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
