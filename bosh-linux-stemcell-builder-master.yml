@@ -141,7 +141,7 @@ jobs:
         get_params:
           skip_download: true
 
-  - name: build-os-image-sles-12
+  - name: build-os-image-sle12
     serial_groups: [sles]
     plan:
       - aggregate:
@@ -151,7 +151,7 @@ jobs:
         - get: ci
           passed:
             - start-job
-        - put: semver.os-image-sles
+        - put: semver.os-image-sle12
           params:
             bump: minor
       - task: build
@@ -168,7 +168,7 @@ jobs:
         - put: docker.sles-os-image
           params:
             tag_prefix: "12-"
-            tag: semver.os-image-sles/number
+            tag: semver.os-image-sle12/number
             import_file: os-image/sles-12.tgz
             tag_as_latest: true
           get_params:
@@ -180,22 +180,22 @@ jobs:
       - aggregate:
         - get: ci
           passed:
-            - build-os-image-sles-12
+            - build-os-image-sle12
         - get: docker.sles-os-image
           trigger: true
           passed:
-            - build-os-image-sles-12
+            - build-os-image-sle12
         - get: git.fissile-stemcell-sles
           trigger: true
-        - get: semver.os-image-sles
+        - get: semver.os-image-sle12
           passed:
-            - build-os-image-sles-12
+            - build-os-image-sle12
       - task: setup-sles-stemcell-versions
         file: ci/tasks/setup-sles-stemcell-versions.yml
         input_mapping:
           src: git.fissile-stemcell-sles
         params:
-          DOCKER_REPOSITORY: os-image-sles
+          DOCKER_REPOSITORY: os-image-sle12
       - put: docker.fissile-stemcell-sles
         params:
           build: versioned-fissile-stemcell-sles
@@ -278,15 +278,15 @@ jobs:
         - get: semver.bosh-stemcell
           passed: [start-job]
         - get: ci
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: src
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: bosh-io-release.bosh
           passed: [start-job]
         - get: os-image
           resource: s3.sles-12-os-image
           trigger: true
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -373,15 +373,15 @@ jobs:
         - get: semver.bosh-stemcell
           passed: [start-job]
         - get: ci
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: src
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: bosh-io-release.bosh
           passed: [start-job]
         - get: os-image
           resource: s3.sles-12-os-image
           trigger: true
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -468,15 +468,15 @@ jobs:
         - get: semver.bosh-stemcell
           passed: [start-job]
         - get: ci
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: src
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: bosh-io-release.bosh
           passed: [start-job]
         - get: os-image
           resource: s3.sles-12-os-image
           trigger: true
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -565,15 +565,15 @@ jobs:
         - get: semver.bosh-stemcell
           passed: [start-job]
         - get: ci
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: src
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: bosh-io-release.bosh
           passed: [start-job]
         - get: os-image
           resource: s3.sles-12-os-image
           trigger: true
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -661,15 +661,15 @@ jobs:
         - get: semver.bosh-stemcell
           passed: [start-job]
         - get: ci
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: src
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
         - get: bosh-io-release.bosh
           passed: [start-job]
         - get: os-image
           resource: s3.sles-12-os-image
           trigger: true
-          passed: [build-os-image-sles-12]
+          passed: [build-os-image-sle12]
       - task: build
         file: ci/tasks/build-stemcell.yml
         privileged: true
@@ -727,11 +727,11 @@ resources:
       region_name: eu-central-1
       initial_version: 0.0.0
 
-  - name: semver.os-image-sles
+  - name: semver.os-image-sle12
     type: semver
     source:
       driver: s3
-      key: os-image-sles-12-version
+      key: os-image-sle12-version
       bucket: concourse-bosh-image
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}

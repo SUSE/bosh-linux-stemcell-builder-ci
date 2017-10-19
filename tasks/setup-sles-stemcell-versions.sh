@@ -17,7 +17,7 @@
 # and
 #
 # 2. The docker base image containing the according base BOSH os-image, e.g.
-#    https://hub.docker.com/r/splatform/os-image-sles/
+#    https://hub.docker.com/r/splatform/os-image-sle12/
 #
 # The os-image image has a version that describes the OS version plus a MAJOR and a MINOR version, e.g. `12SP3-28.2`.
 # The MAJOR version is bumped when new features or components are added, the MINOR version is bumped on security or
@@ -53,12 +53,12 @@ GIT_COMMITS=${GIT_COMMITS:-$(echo ${GIT_DESCRIBE} | awk -F - '{ print $2 }' )}
 GIT_SHA=${GIT_SHA:-$(echo ${GIT_DESCRIBE} | awk -F - '{ print $3 }' )}
 
 ARTIFACT_VERSION=${GIT_TAG}-${GIT_COMMITS}.${GIT_SHA}
-OS_IMAGE_VERSION=$(cat ../semver.os-image-sles/number)
-OS_IMAGE_VERSION_STRIPPED=$(cat ../semver.os-image-sles/number | sed 's/\.0$//;s/\.0$//')
+OS_IMAGE_VERSION=$(cat ../semver.os-image-sle12/number)
+OS_IMAGE_VERSION_STRIPPED=$(cat ../semver.os-image-sle12/number | sed 's/\.0$//;s/\.0$//')
 
 STEMCELL_VERSION=${ARTIFACT_VERSION}-${OS_IMAGE_VERSION_STRIPPED}
 
 set +o errexit +o nounset +o xtrace
 
-sed -i "s@FROM splatform/os-image-sles:12SP3@FROM splatform/$DOCKER_REPOSITORY:12SP3-$OS_IMAGE_VERSION@" Dockerfile
+sed -i "s@FROM splatform/os-image-sle12:12SP3@FROM splatform/$DOCKER_REPOSITORY:12SP3-$OS_IMAGE_VERSION@" Dockerfile
 echo $STEMCELL_VERSION > VERSION

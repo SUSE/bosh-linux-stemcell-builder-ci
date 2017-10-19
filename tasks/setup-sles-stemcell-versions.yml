@@ -8,7 +8,7 @@ image_resource:
 
 inputs:
 - name: ci
-- name: semver.os-image-sles
+- name: semver.os-image-sle12
 - name: src
 
 outputs:
