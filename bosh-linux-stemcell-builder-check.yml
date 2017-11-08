@@ -8,6 +8,10 @@ resource_types:
     type: docker-image
     source:
       repository: splatform/concourse-github-status
+  - name: rubygems
+    type: docker-image
+    source:
+      repository: resource/rubygems
 
 jobs:
   #
@@ -119,6 +123,8 @@ jobs:
         - get: semver.os-image-ubuntu
           passed:
             - build-os-image-ubuntu-trusty
+        - get: rubygems.configgin
+          trigger: true
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
         input_mapping: { src: git.fissile-stemcell-ubuntu }
@@ -217,6 +223,8 @@ jobs:
         - get: semver.os-image-opensuse
           passed:
             - build-os-image-opensuse-leap
+        - get: rubygems.configgin
+          trigger: true
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
         input_mapping: { src: git.fissile-stemcell-opensuse }
@@ -358,6 +366,12 @@ resources:
     source:
       uri: https://github.com/cloudfoundry-community/fissile-stemcell-ubuntu.git
       branch: trusty
+
+  - name: rubygems.configgin
+    type: rubygems
+    source:
+      gem: configgin
+      api_key: {{rubygems-apikey}}
 
   - name: semver.os-image-opensuse
     type: semver
