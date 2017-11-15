@@ -1,4 +1,4 @@
-TARGET ?= skycastle
+TARGET ?= suse.de
 CONCOURSE_URL ?= http://concourse.suse.de/
 GITHUB_ID ?= c29a4757ff0e43c25610
 GITHUB_TEAM ?= 'SUSE/Team Alfred'
