@@ -18,5 +18,5 @@ login-sandbox:
 pipeline-%: ${CONCOURSE_SECRETS_FILE}
 	# Explicitly call bash here to get process substitution, otherwise make
 	# runs the shell in a mode that doesn't support <(...)
-	yes | bash -c "fly -t ${TARGET} set-pipeline -c bosh-linux-stemcell-builder-$*.yml -p stemcells-$* -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+	bash -c "fly -t ${TARGET} set-pipeline -n -c bosh-linux-stemcell-builder-$*.yml -p stemcells-$* -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
 	fly -t ${TARGET} unpause-pipeline -p stemcells-$*
