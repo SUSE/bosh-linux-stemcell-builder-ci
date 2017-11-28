@@ -968,7 +968,6 @@ resources:
       repository: {{docker-internal-os-image}}
       username: {{docker-internal-username}}
       password: {{docker-internal-password}}
-      insecure_registries: [ {{docker-internal-registry}} ]
 
   - name: docker.fissile-stemcell-sles
     type: docker-image
@@ -976,7 +975,6 @@ resources:
       repository: {{docker-internal-fissile-image}}
       username: {{docker-internal-username}}
       password: {{docker-internal-password}}
-      insecure_registries: [ {{docker-internal-registry}} ]
 
   #
   # bosh releases
