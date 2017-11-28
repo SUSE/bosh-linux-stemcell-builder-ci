@@ -689,7 +689,7 @@ resources:
     type: git
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
-      branch: add_sles_pipeline
+      branch: master
       private_key: {{github-private-key}}
 
   - name: src
