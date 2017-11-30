@@ -138,6 +138,9 @@ jobs:
         params:
           build: versioned-fissile-stemcell-opensuse
           tag: versioned-fissile-stemcell-opensuse/VERSION
+          build_args:
+            base_image: splatform/os-image-opensuse:42.2
+            configgin_version: 0.14.0
         get_params:
           skip_download: true
 
@@ -201,7 +204,8 @@ jobs:
           build: versioned-fissile-stemcell-sles
           tag: versioned-fissile-stemcell-sles/VERSION
           build_args:
-            registry: {{docker-internal-registry}}
+            base_image: ((docker-internal-registry))/splatform/os-image-sle12
+            configgin_version: 0.14.0
         get_params:
           skip_download: true
 
@@ -702,13 +706,14 @@ resources:
   - name: git.fissile-stemcell-opensuse
     type: git
     source:
-      uri: https://github.com/SUSE/fissile-stemcell-opensuse.git
+      uri: https://github.com/SUSE/fissile-stemcell-openSUSE.git
       branch: 42.2
 
   - name: git.fissile-stemcell-sles
     type: git
     source:
-      uri: https://github.com/SUSE/fissile-stemcell-sle.git
+      uri: https://github.com/SUSE/fissile-stemcell-openSUSE.git
+      branch: 42.2
 
   - name: git.fissile-stemcell-ubuntu
     type: git
