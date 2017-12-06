@@ -712,8 +712,8 @@ resources:
   - name: git.fissile-stemcell-sles
     type: git
     source:
-      uri: https://github.com/SUSE/fissile-stemcell-openSUSE.git
-      branch: 42.2
+      uri: https://github.com/SUSE/fissile-stemcell-sle.git
+      branch: master
 
   - name: git.fissile-stemcell-ubuntu
     type: git
