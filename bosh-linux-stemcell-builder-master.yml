@@ -275,36 +275,6 @@ jobs:
             file: stemcell/*-go_agent.tgz
 
 
-  - name: build-openstack-kvm-sles-12
-    serial_groups: [sles]
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed: [start-job]
-        - get: ci
-          passed: [build-os-image-sle12]
-        - get: src
-          passed: [build-os-image-sle12]
-        - get: bosh-io-release.bosh
-          passed: [start-job]
-        - get: os-image
-          resource: s3.sles-12-os-image
-          trigger: true
-          passed: [build-os-image-sle12]
-      - task: build
-        file: ci/tasks/build-stemcell.yml
-        privileged: true
-        params:
-          IAAS:       openstack
-          HYPERVISOR: kvm
-          OS_NAME:    sles
-          OS_VERSION: 12
-          OS_IMAGE_BUCKET: concourse-bosh-image
-      - aggregate:
-        - put: s3.openstack-kvm-sles-12
-          params:
-            file: stemcell/*-go_agent.tgz
-
   #
   # AWS
   #
@@ -366,37 +336,6 @@ jobs:
           OS_IMAGE_BUCKET: concourse-bosh-image
       - aggregate:
         - put: s3.aws-xen-opensuse-leap
-          params:
-            file: stemcell/*-go_agent.tgz
-
-
-  - name: build-aws-xen-sles-12
-    serial_groups: [sles]
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed: [start-job]
-        - get: ci
-          passed: [build-os-image-sle12]
-        - get: src
-          passed: [build-os-image-sle12]
-        - get: bosh-io-release.bosh
-          passed: [start-job]
-        - get: os-image
-          resource: s3.sles-12-os-image
-          trigger: true
-          passed: [build-os-image-sle12]
-      - task: build
-        file: ci/tasks/build-stemcell.yml
-        privileged: true
-        params:
-          IAAS:       aws
-          HYPERVISOR: xen
-          OS_NAME:    sles
-          OS_VERSION: 12
-          OS_IMAGE_BUCKET: concourse-bosh-image
-      - aggregate:
-        - put: s3.aws-xen-sles-12
           params:
             file: stemcell/*-go_agent.tgz
 
@@ -464,38 +403,6 @@ jobs:
           params:
             file: stemcell/*-go_agent.tgz
 
-
-  - name: build-azure-hyperv-sles-12
-    serial_groups: [sles]
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed: [start-job]
-        - get: ci
-          passed: [build-os-image-sle12]
-        - get: src
-          passed: [build-os-image-sle12]
-        - get: bosh-io-release.bosh
-          passed: [start-job]
-        - get: os-image
-          resource: s3.sles-12-os-image
-          trigger: true
-          passed: [build-os-image-sle12]
-      - task: build
-        file: ci/tasks/build-stemcell.yml
-        privileged: true
-        params:
-          IAAS:       azure
-          HYPERVISOR: hyperv
-          OS_NAME:    sles
-          OS_VERSION: 12
-          OS_IMAGE_BUCKET: concourse-bosh-image
-      - aggregate:
-        - put: s3.azure-hyperv-sles-12
-          params:
-            file: stemcell/*-go_agent.tgz
-
-
   #
   # google
   #
@@ -562,36 +469,6 @@ jobs:
             file: stemcell/*-go_agent.tgz
 
 
-  - name: build-google-kvm-sles-12
-    serial_groups: [sles]
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed: [start-job]
-        - get: ci
-          passed: [build-os-image-sle12]
-        - get: src
-          passed: [build-os-image-sle12]
-        - get: bosh-io-release.bosh
-          passed: [start-job]
-        - get: os-image
-          resource: s3.sles-12-os-image
-          trigger: true
-          passed: [build-os-image-sle12]
-      - task: build
-        file: ci/tasks/build-stemcell.yml
-        privileged: true
-        params:
-          IAAS:       google
-          HYPERVISOR: kvm
-          OS_NAME:    sles
-          OS_VERSION: 12
-          OS_IMAGE_BUCKET: concourse-bosh-image
-      - aggregate:
-        - put: s3.google-kvm-sles-12
-          params:
-            file: stemcell/*-go_agent.tgz
-
   #
   # vsphere
   #
@@ -657,36 +534,6 @@ jobs:
           params:
             file: stemcell/*-go_agent.tgz
 
-
-  - name: build-vsphere-esxi-sles-12
-    serial_groups: [sles]
-    plan:
-      - aggregate:
-        - get: semver.bosh-stemcell
-          passed: [start-job]
-        - get: ci
-          passed: [build-os-image-sle12]
-        - get: src
-          passed: [build-os-image-sle12]
-        - get: bosh-io-release.bosh
-          passed: [start-job]
-        - get: os-image
-          resource: s3.sles-12-os-image
-          trigger: true
-          passed: [build-os-image-sle12]
-      - task: build
-        file: ci/tasks/build-stemcell.yml
-        privileged: true
-        params:
-          IAAS:       vsphere
-          HYPERVISOR: esxi
-          OS_NAME:    sles
-          OS_VERSION: 12
-          OS_IMAGE_BUCKET: concourse-bosh-image
-      - aggregate:
-        - put: s3.vsphere-esxi-sles-12
-          params:
-            file: stemcell/*-go_agent.tgz
 
 resources:
   - name: ci
@@ -918,51 +765,6 @@ resources:
     source:
       bucket: concourse-bosh-image
       versioned_file: bosh-sles-12-os-image.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.openstack-kvm-sles-12
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.aws-xen-sles-12
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/aws/bosh-stemcell-(.+)-aws-xen-sles-12-go_agent.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.azure-hyperv-sles-12
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/hyperv/bosh-stemcell-(.+)-azure-hyperv-sles-12-go_agent.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.google-kvm-sles-12
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/google/bosh-stemcell-(.+)-google-kvm-sles-12-go_agent.tgz
-      access_key_id: {{aws-access-key}}
-      secret_access_key: {{aws-secret-key}}
-      region_name: eu-central-1
-
-  - name: s3.vsphere-esxi-sles-12
-    type: s3
-    source:
-      bucket: concourse-bosh-stemcell
-      regexp: bosh-stemcell-candidate/google/bosh-stemcell-(.+)-vsphere-esxi-sles-12-go_agent.tgz
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
