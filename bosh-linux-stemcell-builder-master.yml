@@ -2,14 +2,11 @@
 jobs:
   #
   # Pipeline won't automatically build if src changes, need to
-  # run start-job manually first to unblock the resource
+  # run increase-stemcell-version manually first to increase the stemcell version
   #
-  - name: start-job
+  - name: increase-stemcell-version
     serial: true
     plan:
-      - get: src
-      - get: ci
-      - get: bosh-io-release.bosh
       - get: semver.bosh-stemcell
         params:
           bump: major
@@ -22,11 +19,7 @@ jobs:
     plan:
       - aggregate:
         - get: src
-          passed:
-            - start-job
         - get: ci
-          passed:
-            - start-job
         - put: semver.os-image-ubuntu
           params:
             bump: minor
@@ -84,14 +77,12 @@ jobs:
     plan:
       - aggregate:
         - get: src
-          passed:
-            - start-job
         - get: ci
-          passed:
-            - start-job
         - put: semver.os-image-opensuse
           params:
             bump: minor
+        - get: lftp.os-image-opensuse
+          trigger: true
       - task: build
         file: ci/tasks/build-os-image-opensuse.yml
         privileged: true
@@ -149,14 +140,12 @@ jobs:
     plan:
       - aggregate:
         - get: src
-          passed:
-            - start-job
         - get: ci
-          passed:
-            - start-job
         - put: semver.os-image-sle12
           params:
             bump: minor
+        - get: lftp.os-image-sle12
+          trigger: true
       - task: build
         file: ci/tasks/build-os-image-opensuse.yml
         privileged: true
@@ -218,13 +207,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
           passed: [build-os-image-ubuntu-trusty]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.ubuntu-trusty-os-image
           trigger: true
@@ -249,13 +237,11 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
           passed: [build-os-image-opensuse-leap]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.opensuse-leap-os-image
           trigger: true
@@ -284,13 +270,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
           passed: [build-os-image-ubuntu-trusty]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.ubuntu-trusty-os-image
           trigger: true
@@ -314,13 +299,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
           passed: [build-os-image-opensuse-leap]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.opensuse-leap-os-image
           trigger: true
@@ -348,13 +332,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
           passed: [build-os-image-ubuntu-trusty]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.ubuntu-trusty-os-image
           trigger: true
@@ -378,13 +361,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
           passed: [build-os-image-opensuse-leap]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.opensuse-leap-os-image
           trigger: true
@@ -412,13 +394,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
           passed: [build-os-image-ubuntu-trusty]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.ubuntu-trusty-os-image
           trigger: true
@@ -443,13 +424,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
           passed: [build-os-image-opensuse-leap]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.opensuse-leap-os-image
           trigger: true
@@ -478,13 +458,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
           passed: [build-os-image-ubuntu-trusty]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.ubuntu-trusty-os-image
           trigger: true
@@ -509,13 +488,12 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [start-job]
+          passed: [increase-stemcell-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
           passed: [build-os-image-opensuse-leap]
         - get: bosh-io-release.bosh
-          passed: [start-job]
         - get: os-image
           resource: s3.opensuse-leap-os-image
           trigger: true
@@ -534,8 +512,26 @@ jobs:
           params:
             file: stemcell/*-go_agent.tgz
 
+resource_types:
+- name: lftp-resource
+  type: docker-image
+  source:
+    repository: machinerytool/concourse-lftp-resource
+    tag: latest
 
 resources:
+  - name: lftp.os-image-sle12
+    type: lftp-resource
+    source:
+      url: https://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/SLE/images/
+      regexp: SLES12-SP3.x86_64-1.42.2-Build(.*).tbz
+
+  - name: lftp.os-image-opensuse
+    type: lftp-resource
+    source:
+      url: https://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/openSUSE/images/
+      regexp: Leap-42.1.x86_64-1.42.2-Build(.*).tbz
+
   - name: ci
     type: git
     source:
@@ -610,6 +606,7 @@ resources:
       access_key_id: {{aws-access-key}}
       secret_access_key: {{aws-secret-key}}
       region_name: eu-central-1
+
   #
   # ubuntu-trusty
   #
