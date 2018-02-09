@@ -96,7 +96,7 @@ jobs:
             acl: public-read
         - put: docker.opensuse-os-image
           params:
-            tag_prefix: "42.2-"
+            tag_prefix: "42.3-"
             tag: semver.os-image-opensuse/number
             import_file: os-image/opensuse-leap.tgz
             tag_as_latest: true
@@ -130,7 +130,7 @@ jobs:
           build: versioned-fissile-stemcell-opensuse
           tag: versioned-fissile-stemcell-opensuse/VERSION
           build_args:
-            base_image: splatform/os-image-opensuse:42.2
+            base_image: splatform/os-image-opensuse:42.3
             configgin_version: 0.14.0
         get_params:
           skip_download: true
@@ -586,14 +586,15 @@ resources:
   - name: lftp.os-image-sle12
     type: lftp-resource
     source:
-      url: https://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/SLE/images/
-      regexp: SLES12-SP3.x86_64-1.42.2-Build(.*).tbz
+      url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/SLE/images/
+      regexp: SLES12-SP3.x86_64-2.12.3-Build(.*).tbz
 
   - name: lftp.os-image-opensuse
     type: lftp-resource
     source:
-      url: https://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/openSUSE/images/
-      regexp: Leap-42.1.x86_64-1.42.2-Build(.*).tbz
+      url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/openSUSE/images/
+      regexp: Leap-42.3.x86_64-1.42.3-Build(.*).tbz
+
 
   - name: ci
     type: git
@@ -613,7 +614,7 @@ resources:
     type: git
     source:
       uri: https://github.com/SUSE/fissile-stemcell-openSUSE.git
-      branch: 42.2
+      branch: 42.3
 
   - name: git.fissile-stemcell-sles
     type: git
