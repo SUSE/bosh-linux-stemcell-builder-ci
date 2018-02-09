@@ -131,7 +131,7 @@ jobs:
           tag: versioned-fissile-stemcell-opensuse/VERSION
           build_args:
             base_image: splatform/os-image-opensuse:42.3
-            configgin_version: 0.14.0
+            configgin_version: 0.14.1
         get_params:
           skip_download: true
       - put: email.suse
@@ -200,7 +200,7 @@ jobs:
           tag: versioned-fissile-stemcell-sles/VERSION
           build_args:
             base_image: ((docker-internal-registry))/splatform/os-image-sle12
-            configgin_version: 0.14.0
+            configgin_version: 0.14.1
         get_params:
           skip_download: true
       - put: email.suse
