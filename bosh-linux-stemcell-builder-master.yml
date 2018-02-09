@@ -520,6 +520,37 @@ jobs:
           params:
             file: stemcell/*-go_agent.tgz
 
+  - name: build-suse-os-image-stemcell-builder
+    plan:
+    - get: src
+    - get: git.ovftool
+    - get: docker.opensuse
+      trigger:  true
+    - task: copy-ovftool
+      config:
+        inputs:
+          - name: git.ovftool
+          - name: src
+        outputs:
+          - name: output
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: busybox}
+        run:
+          path: sh
+          args:
+            - -exc
+            - |
+              cp -a src/. output/
+              cd git.ovftool
+              echo 'a21ce600f92321a71cde5de1bb947ca9aa62d898c81cefcba4066b756b43993f *VMware-ovftool-4.1.0-2459827-lin.x86_64.bundle' | sha256sum -c || exit 1
+              cp VMware-ovftool-4.1.0-2459827-lin.x86_64.bundle ../output/ci/docker/suse-os-image-stemcell-builder/
+    - put: docker.splatform-suse-os-image-stemcell-builder
+      params:
+        build: output/ci/docker/suse-os-image-stemcell-builder/
+        tag_as_latest: true
+
 resource_types:
 - name: lftp-resource
   type: docker-image
@@ -595,6 +626,12 @@ resources:
       url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/openSUSE/images/
       regexp: Leap-42.3.x86_64-1.42.3-Build(.*).tbz
 
+  - name: git.ovftool
+    type: git
+    source:
+      uri: https://github.com/richardatlateralblast/ottar.git
+      check_every: 24h
+      paths: [VMware-ovftool-4.1.0-2459827-lin.x86_64.bundle]
 
   - name: ci
     type: git
@@ -851,3 +888,17 @@ resources:
     type: bosh-io-release
     source:
       repository: cloudfoundry/bosh
+
+  - name: docker.opensuse
+    type: docker-image
+    source:
+      repository: opensuse
+      tag: leap
+
+  - name: docker.splatform-suse-os-image-stemcell-builder
+    type: docker-image
+    source:
+      repository: splatform/suse-os-image-stemcell-builder
+      tag: latest
+      username: {{docker-username}}
+      password: {{docker-password}}
