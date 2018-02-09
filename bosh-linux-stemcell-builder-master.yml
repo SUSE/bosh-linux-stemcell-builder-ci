@@ -612,7 +612,7 @@ resources:
           W8NcaXbJ/yeblISOdtHRxuCpZs8P9MxDAQn/X873eYfcim1xfqSimgJ2dpA=
           -----END CERTIFICATE-----
       from: "cf-ci-bot@suse.de"
-      to: [ "team-alfred@suse.de" ]
+      to: [ "paas-notifications@suse.de" ]
 
   - name: lftp.os-image-sle12
     type: lftp-resource
