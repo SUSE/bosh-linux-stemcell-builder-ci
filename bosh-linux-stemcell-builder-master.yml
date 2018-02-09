@@ -143,7 +143,7 @@ jobs:
     serial_groups: [sles]
     plan:
       - aggregate:
-        - get: src
+        - get: src-sle
         - get: ci
         - put: semver.os-image-sle12
           params:
@@ -152,6 +152,8 @@ jobs:
           trigger: true
       - task: build
         file: ci/tasks/build-os-image-opensuse.yml
+        input_mapping:
+          src: src-sle
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      sles
@@ -644,7 +646,14 @@ resources:
     type: git
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
-      branch: merged_stemcells
+      branch: opensuse_stemcell
+      private_key: {{github-private-key}}
+
+  - name: src-sle
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder.git
+      branch: sle_stemcell
       private_key: {{github-private-key}}
 
   - name: git.fissile-stemcell-opensuse
