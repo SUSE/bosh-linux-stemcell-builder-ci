@@ -89,7 +89,7 @@ sudo --preserve-env --set-home --user ubuntu -- /bin/bash --login -i <<SUDO
   : ${OS_IMAGE_BUCKET:=bosh-os-images}
 
   bundle install --local
-  bundle exec rake stemcell:build[$IAAS,$HYPERVISOR,$OS_NAME,$OS_VERSION,$OS_IMAGE_BUCKET,bosh-$OS_NAME-$OS_VERSION-os-image.tgz]
+  bundle exec rake stemcell:build[$IAAS,$HYPERVISOR,$OS_NAME,$OS_VERSION,$OS_IMAGE_BUCKET,bosh-$OS_NAME-$OS_VERSION-os-image.tgz,$CANDIDATE_BUILD_NUMBER]
   rm -f ./tmp/base_os_image.tgz
 SUDO
 
