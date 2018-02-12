@@ -63,6 +63,8 @@ done
 
 chown -R ubuntu:ubuntu src
 
+sudo chmod u+s $(which sudo)
+
 # Monkey patch dependency fetcher to always download the latest image version
 # from S3 as opposed to the upstream version which downloads a version set
 # in a json file:
