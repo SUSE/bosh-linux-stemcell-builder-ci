@@ -130,7 +130,7 @@ jobs:
           build: versioned-fissile-stemcell-opensuse
           tag: versioned-fissile-stemcell-opensuse/VERSION
           build_args:
-            base_image: splatform/os-image-opensuse:42.3
+            base_image: splatform/os-image-opensuse
             configgin_version: 0.14.1
         get_params:
           skip_download: true
