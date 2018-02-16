@@ -1,12 +1,24 @@
 ---
 jobs:
-  #
-  # Pipeline won't automatically build if src changes, need to
-  # run increase-stemcell-version manually first to increase the stemcell version
-  #
-  - name: increase-stemcell-version
+  - name: increase-version
     serial: true
     plan:
+      - get: ci
+      - get: src
+        trigger: true
+      - get: semver.bosh-stemcell
+        params:
+          bump: major
+      - put: semver.bosh-stemcell
+        params:
+          file: semver.bosh-stemcell/number
+
+  - name: increase-version-sle
+    serial: true
+    plan:
+      - get: ci
+      - get: src-sle
+        trigger: true
       - get: semver.bosh-stemcell
         params:
           bump: major
@@ -19,7 +31,12 @@ jobs:
     plan:
       - aggregate:
         - get: src
+          passed:
+            - increase-version
+          trigger: true
         - get: ci
+          passed:
+            - increase-version
         - put: semver.os-image-ubuntu
           params:
             bump: minor
@@ -77,7 +94,12 @@ jobs:
     plan:
       - aggregate:
         - get: src
+          passed:
+            - increase-version
+          trigger: true
         - get: ci
+          passed:
+            - increase-version
         - put: semver.os-image-opensuse
           params:
             bump: minor
@@ -140,7 +162,12 @@ jobs:
     plan:
       - aggregate:
         - get: src-sle
+          passed:
+            - increase-version-sle
+          trigger: true
         - get: ci
+          passed:
+            - increase-version-sle
         - put: semver.os-image-sle12
           params:
             bump: minor
@@ -209,7 +236,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
@@ -272,7 +299,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
@@ -301,7 +328,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
@@ -334,7 +361,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
@@ -363,7 +390,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
@@ -396,7 +423,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
@@ -426,7 +453,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
@@ -460,7 +487,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-ubuntu-trusty]
         - get: src
@@ -490,7 +517,7 @@ jobs:
     plan:
       - aggregate:
         - get: semver.bosh-stemcell
-          passed: [increase-stemcell-version]
+          passed: [increase-version]
         - get: ci
           passed: [build-os-image-opensuse-leap]
         - get: src
