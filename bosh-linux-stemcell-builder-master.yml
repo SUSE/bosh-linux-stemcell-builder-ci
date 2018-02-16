@@ -573,7 +573,7 @@ resources:
     type: lftp-resource
     source:
       url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/openSUSE/images/
-      regexp: Leap-42.3.x86_64-1.42.3-Build1.(.*).tbz
+      regexp: Leap-42.3.x86_64-1.42.3-Build(.*).tbz
 
   - name: git.ovftool
     type: git
