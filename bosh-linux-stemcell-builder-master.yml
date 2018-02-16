@@ -13,19 +13,6 @@ jobs:
         params:
           file: semver.bosh-stemcell/number
 
-  - name: increase-version-sle
-    serial: true
-    plan:
-      - get: ci
-      - get: src-sle
-        trigger: true
-      - get: semver.bosh-stemcell
-        params:
-          bump: major
-      - put: semver.bosh-stemcell
-        params:
-          file: semver.bosh-stemcell/number
-
   - name: build-os-image-ubuntu-trusty
     serial_groups: [ubuntu]
     plan:
@@ -162,12 +149,8 @@ jobs:
     plan:
       - aggregate:
         - get: src-sle
-          passed:
-            - increase-version-sle
           trigger: true
         - get: ci
-          passed:
-            - increase-version-sle
         - put: semver.os-image-sle12
           params:
             bump: minor
