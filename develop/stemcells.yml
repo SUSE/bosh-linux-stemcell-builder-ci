@@ -27,11 +27,10 @@ jobs:
       - task: test-unit
         file: bosh-linux-stemcell-builder/ci/tasks/test-unit.yml
 
-  - name: build-stemcell
+  - name: build-stemcell-opensuse
     serial: true
     plan:
       - get: bosh-linux-stemcell-builder
-        trigger: true
         passed:
           - test-unit
       - get: opensuse-leap-os-image
@@ -43,21 +42,31 @@ jobs:
         params:
           file: version/number
 
+  - name: build-stemcell-ubuntu
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+        passed:
+          - test-unit
+      - get: ubuntu-trusty-os-image
+        trigger: true
+      - get: version
+
   # WARDEN
   #
 
   - name: build-warden-boshlite-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -78,17 +87,17 @@ jobs:
           rebase: true
 
   - name: build-warden-boshlite-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -113,17 +122,17 @@ jobs:
   #
 
   - name: build-aws-xen-hvm-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu2]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -144,17 +153,17 @@ jobs:
           rebase: true
 
   - name: build-aws-xen-hvm-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse2]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -180,17 +189,17 @@ jobs:
   #
 
   - name: build-azure-hyperv-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -211,17 +220,17 @@ jobs:
           rebase: true
 
   - name: build-azure-hyperv-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -246,17 +255,17 @@ jobs:
   #
 
   - name: build-google-kvm-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu2]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -277,17 +286,17 @@ jobs:
           rebase: true
 
   - name: build-google-kvm-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse2]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -312,17 +321,17 @@ jobs:
   #
 
   - name: build-openstack-kvm-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -346,17 +355,17 @@ jobs:
           rebase: true
 
   - name: build-openstack-kvm-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -385,17 +394,17 @@ jobs:
   #
 
   - name: build-vsphere-esxi-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu2]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -416,17 +425,17 @@ jobs:
           rebase: true
 
   - name: build-vsphere-esxi-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse2]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -451,17 +460,17 @@ jobs:
   #
 
   - name: build-vcloud-esxi-ubuntu-trusty
-    serial_groups: [ubuntu]
+    serial_groups: [ubuntu1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-ubuntu]
           - get: stemcells-index
           - get: ubuntu-trusty-os-image
+            trigger: true
+            passed: [build-stemcell-ubuntu]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
@@ -482,17 +491,17 @@ jobs:
           rebase: true
 
   - name: build-vcloud-esxi-opensuse-leap
-    serial_groups: [opensuse]
+    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
-            trigger: true
-            passed: [build-stemcell]
           - get: suse-ci
           - get: bosh-linux-stemcell-builder
-            passed: [build-stemcell]
+            passed: [build-stemcell-opensuse]
           - get: stemcells-index
           - get: opensuse-leap-os-image
+            trigger: true
+            passed: [build-stemcell-opensuse]
       - task: create-stemcell
         file: suse-ci/tasks/build.yml
         input_mapping:
