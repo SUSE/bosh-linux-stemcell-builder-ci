@@ -81,7 +81,7 @@ jobs:
   #
 
   - name: build-aws-xen-hvm-opensuse-leap
-    serial_groups: [1]
+    serial_groups: [2]
     plan:
       - aggregate:
           - get: version
@@ -116,7 +116,7 @@ jobs:
   #
 
   - name: build-azure-hyperv-opensuse-leap
-    serial_groups: [2]
+    serial_groups: [1]
     plan:
       - aggregate:
           - get: version
@@ -184,7 +184,7 @@ jobs:
   #
 
   - name: build-openstack-kvm-opensuse-leap
-    serial_groups: [3]
+    serial_groups: [1]
     plan:
       - aggregate:
           - get: version
@@ -222,7 +222,7 @@ jobs:
   #
 
   - name: build-vsphere-esxi-opensuse-leap
-    serial_groups: [3]
+    serial_groups: [2]
     plan:
       - aggregate:
           - get: version
@@ -256,7 +256,7 @@ jobs:
   #
 
   - name: build-vcloud-esxi-opensuse-leap
-    serial_groups: [4]
+    serial_groups: [1]
     plan:
       - aggregate:
           - get: version
