@@ -303,7 +303,7 @@ resources:
     type: git
     source:
       uri: git@github.com:SUSE/cat-pools
-      branch: stemcells-index
+      branch: stemcells-release-index
       private_key: {{github-private-key}}
 
   - name: version

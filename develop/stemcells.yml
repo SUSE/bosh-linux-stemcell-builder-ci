@@ -531,7 +531,7 @@ resources:
     type: git
     source:
       uri: git@github.com:SUSE/cat-pools
-      branch: stemcells-index
+      branch: stemcells-develop-index
       private_key: {{github-private-key}}
 
   - name: version
