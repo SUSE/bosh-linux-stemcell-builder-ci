@@ -26,6 +26,8 @@ jobs:
 
   - name: build-opensuse-leap
     plan:
+      - get: lftp.os-image-opensuse
+        trigger: true
       - get: bosh-linux-stemcell-builder
         trigger: true
         passed:
@@ -44,6 +46,8 @@ jobs:
 
   - name: build-sle-12
     plan:
+      - get: lftp.os-image-sle
+        trigger: true
       - get: sle-bosh-linux-stemcell-builder
         trigger: true
         passed:
@@ -62,13 +66,25 @@ jobs:
           file: os-image/sles-12.tgz
           acl: public-read
 
+resource_types:
+- name: lftp-resource
+  type: docker-image
+  source:
+    repository: machinerytool/concourse-lftp-resource
+    tag: latest
+
 resources:
-  # - name: suse-ci
-  #   type: git
-  #   source:
-  #     uri: git@github.com:SUSE/cloudfoundry
-  #     branch: bosh-stemcell
-  #     private_key: {{github-private-key}}
+  - name: lftp.os-image-sle
+    type: lftp-resource
+    source:
+      url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/SLE/images/
+      regexp: SLES12-SP3.x86_64-2.12.3-Build(.*).tbz
+
+  - name: lftp.os-image-opensuse
+    type: lftp-resource
+    source:
+      url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/openSUSE/images/
+      regexp: Leap-42.3.x86_64-1.42.3-Build(.*).tbz
 
   - name: bosh-linux-stemcell-builder
     type: git
