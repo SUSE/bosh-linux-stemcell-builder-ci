@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: opensuse
+    tag: leap
+
+inputs:
+  - name: ci
+  - name: semver.os-image
+
+outputs:
+  - name: build_args
+
+run:
+  path: ci/tasks/prepare_docker_build_args.sh
+
+params:
+  TAG_PREFIX: replace-me
+  BUILD_ARGS_TMPL: replace-me

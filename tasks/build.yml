@@ -7,20 +7,22 @@ image_resource:
     repository: bosh/os-image-stemcell-builder
 
 inputs:
-  - name: src
-  - name: ci
-  - name: semver.bosh-stemcell
+  - name: suse-ci
+  - name: bosh-linux-stemcell-builder
+  - name: version
+  - name: stemcells-index
+  - name: os-image
 
 outputs:
   - name: stemcell
+  - name: stemcells-index
+    path: stemcells-index-output
 
 run:
-  path: ci/tasks/build-stemcell.sh
+  path: suse-ci/tasks/build.sh
 
 params:
   IAAS:         replace-me
   HYPERVISOR:   replace-me
   OS_NAME:      replace-me
   OS_VERSION:   replace-me
-  OS_IMAGE_BUCKET: ""
-  BOSHIO_TOKEN: ""

@@ -1,0 +1,4 @@
+osimage-aws-bucket: suse-bosh-stemcells
+osimage-aws-region: eu-central-1
+stemcell-aws-bucket: suse-bosh-stemcells
+stemcell-aws-region: eu-central-1

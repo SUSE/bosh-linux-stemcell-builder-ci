@@ -1,0 +1,268 @@
+---
+jobs:
+  - name: upload-os-image-to-docker-ubuntu-trusty
+    plan:
+      - aggregate:
+        - get: s3.ubuntu-os-image
+          trigger: true
+        - put: semver.os-image-ubuntu
+          params:
+            bump: minor
+      - put: docker.ubuntu-os-image
+        params:
+          tag_prefix: ((os-image-tag-prefix-ubuntu))
+          tag: semver.os-image-ubuntu/number
+          import_file: s3.ubuntu-os-image/bosh-ubuntu-trusty-os-image.tgz
+          tag_as_latest: ((tag-as-latest))
+
+  - name: upload-os-image-to-docker-opensuse-leap
+    plan:
+      - aggregate:
+        - get: s3.opensuse-os-image
+          trigger: true
+        - put: semver.os-image-opensuse
+          params:
+            bump: minor
+      - put: docker.opensuse-os-image
+        params:
+          tag_prefix: ((os-image-tag-prefix-opensuse))
+          tag: semver.os-image-opensuse/number
+          import_file: s3.opensuse-os-image/bosh-opensuse-leap-os-image.tgz
+          tag_as_latest: ((tag-as-latest))
+
+  - name: upload-os-image-to-docker-sle-12
+    plan:
+      - aggregate:
+        - get: s3.sle-os-image
+          trigger: true
+        - put: semver.os-image-sle12
+          params:
+            bump: minor
+      - put: docker.sle-os-image
+        params:
+          tag_prefix: ((os-image-tag-prefix-sle))
+          tag: semver.os-image-sle12/number
+          import_file: s3.sle-os-image/bosh-sle-12-os-image.tgz
+          tag_as_latest: ((tag-as-latest))
+
+  - name: build-fissile-stemcell-ubuntu-trusty
+    plan:
+      - get: ci
+      - get: semver.os-image-ubuntu
+        passed:
+          - upload-os-image-to-docker-ubuntu-trusty
+      - get: git.fissile-stemcell-ubuntu
+        trigger: true
+      - task: prepare_docker_build_args
+        file: ci/tasks/prepare_docker_build_args.yml
+        input_mapping:
+          semver.os-image: semver.os-image-ubuntu
+        params:
+          TAG_PREFIX: ((os-image-tag-prefix-ubuntu))
+          BUILD_ARGS_TMPL:
+            {"base_image": "splatform/os-image-ubuntu:base_image_tag_var", "configgin_version": "0.14.1"}
+      - task: setup-ubuntu-stemcell-versions
+        file: ci/tasks/setup-ubuntu-stemcell-versions.yml
+        input_mapping:
+          src: git.fissile-stemcell-ubuntu
+        params:
+          DOCKER_REPOSITORY: os-image-ubuntu
+      - put: docker.fissile-stemcell-ubuntu
+        params:
+          build: versioned-fissile-stemcell-ubuntu
+          tag_prefix: ((fissile-tag-prefix-ubuntu))
+          tag: versioned-fissile-stemcell-ubuntu/VERSION
+          build_args_file: build_args/json
+        get_params:
+          skip_download: true
+
+  - name: build-fissile-stemcell-opensuse-leap
+    plan:
+      - get: ci
+      - get: semver.os-image-opensuse
+        passed:
+          - upload-os-image-to-docker-opensuse-leap
+      - get: git.fissile-stemcell-opensuse
+        trigger: true
+      - task: prepare_docker_build_args
+        file: ci/tasks/prepare_docker_build_args.yml
+        input_mapping:
+          semver.os-image: semver.os-image-opensuse
+        params:
+          TAG_PREFIX: ((os-image-tag-prefix-opensuse))
+          BUILD_ARGS_TMPL:
+            {"base_image": "splatform/os-image-opensuse:base_image_tag_var", "configgin_version": "0.14.1"}
+      - task: setup-opensuse-stemcell-versions
+        file: ci/tasks/setup-opensuse-stemcell-versions.yml
+        input_mapping:
+          src: git.fissile-stemcell-opensuse
+        params:
+          DOCKER_REPOSITORY: os-image-opensuse
+      - put: docker.fissile-stemcell-opensuse
+        params:
+          build: versioned-fissile-stemcell-opensuse
+          tag_prefix: ((fissile-tag-prefix-opensuse))
+          tag: versioned-fissile-stemcell-opensuse/VERSION
+          build_args_file: build_args/json
+        get_params:
+          skip_download: true
+
+  - name: build-fissile-stemcell-sle-12
+    plan:
+      - get: ci
+      - get: semver.os-image-sle12
+        passed:
+          - upload-os-image-to-docker-sle-12
+      - get: git.fissile-stemcell-sle
+        trigger: true
+      - task: prepare_docker_build_args
+        file: ci/tasks/prepare_docker_build_args.yml
+        input_mapping:
+          semver.os-image: semver.os-image-sle12
+        params:
+          TAG_PREFIX: ((os-image-tag-prefix-sle))
+          BUILD_ARGS_TMPL:
+            {"base_image": "((docker-internal-os-image)):base_image_tag_var", "configgin_version": "0.14.1"}
+      - task: setup-sle-stemcell-versions
+        file: ci/tasks/setup-sles-stemcell-versions.yml
+        input_mapping:
+          src: git.fissile-stemcell-sle
+        params:
+          DOCKER_REPOSITORY: os-image-sle12
+      - put: docker.fissile-stemcell-sle
+        params:
+          build: versioned-fissile-stemcell-sles
+          tag_prefix: ((fissile-tag-prefix-sle))
+          tag: versioned-fissile-stemcell-sles/VERSION
+          build_args_file: build_args/json
+        get_params:
+          skip_download: true
+
+resources:
+  - name: ci
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
+      private_key: {{github-private-key}}
+
+  - name: git.fissile-stemcell-opensuse
+    type: git
+    source:
+      uri: https://github.com/SUSE/fissile-stemcell-openSUSE.git
+      branch: 42.3
+
+  - name: git.fissile-stemcell-sle
+    type: git
+    source:
+      uri: https://github.com/SUSE/fissile-stemcell-sle.git
+      branch: master
+
+  - name: git.fissile-stemcell-ubuntu
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry-community/fissile-stemcell-ubuntu.git
+      branch: trusty
+
+  - name: semver.os-image-opensuse
+    type: semver
+    source:
+      driver: s3
+      key: ((osimage-aws-directory))/os-image-opensuse-version
+      bucket: ((osimage-aws-bucket))
+      access_key_id: ((aws-access-key))
+      secret_access_key: ((aws-secret-key))
+      region_name: ((osimage-aws-region))
+      initial_version: 30.0.0
+
+  - name: semver.os-image-sle12
+    type: semver
+    source:
+      driver: s3
+      key: ((osimage-aws-directory))/os-image-sle-version
+      bucket: ((osimage-aws-bucket))
+      access_key_id: {{aws-access-key}}
+      secret_access_key: {{aws-secret-key}}
+      region_name: ((osimage-aws-region))
+      initial_version: 0.90.0
+
+  - name: semver.os-image-ubuntu
+    type: semver
+    source:
+      driver: s3
+      key: ((osimage-aws-directory))/os-image-ubuntu-version
+      bucket: ((osimage-aws-bucket))
+      access_key_id: ((aws-access-key))
+      secret_access_key: ((aws-secret-key))
+      region_name: ((osimage-aws-region))
+      initial_version: 3.0.0
+
+  - name: docker.ubuntu-os-image
+    type: docker-image
+    source:
+      repository: splatform/os-image-ubuntu
+      tag: trusty
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.fissile-stemcell-ubuntu
+    type: docker-image
+    source:
+      repository: splatform/fissile-stemcell-ubuntu
+      tag: trusty
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.opensuse-os-image
+    type: docker-image
+    source:
+      repository: splatform/os-image-opensuse
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.fissile-stemcell-opensuse
+    type: docker-image
+    source:
+      repository: splatform/fissile-stemcell-opensuse
+      username: {{docker-username}}
+      password: {{docker-password}}
+
+  - name: docker.sle-os-image
+    type: docker-image
+    source:
+      repository: {{docker-internal-os-image}}
+      username: {{docker-internal-username}}
+      password: {{docker-internal-password}}
+
+  - name: docker.fissile-stemcell-sle
+    type: docker-image
+    source:
+      repository: {{docker-internal-fissile-image}}
+      username: {{docker-internal-username}}
+      password: {{docker-internal-password}}
+
+  - name: s3.ubuntu-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-ubuntu-trusty-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
+
+  - name: s3.opensuse-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-opensuse-leap-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
+
+  - name: s3.sle-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-sle-12-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}

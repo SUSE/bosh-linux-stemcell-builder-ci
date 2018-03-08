@@ -1,0 +1,9 @@
+os-image-tag-prefix-ubuntu: "trusty-"
+os-image-tag-prefix-opensuse: "42.3-"
+os-image-tag-prefix-sle: "12-"
+
+fissile-tag-prefix-ubuntu: ""
+fissile-tag-prefix-sle: ""
+fissile-tag-prefix-opensuse: ""
+
+tag-as-latest: true

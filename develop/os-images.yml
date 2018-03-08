@@ -1,0 +1,160 @@
+---
+jobs:
+  - name: build-ubuntu-trusty
+    serial_groups: [ubuntu]
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - task: build
+        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      ubuntu
+          OPERATING_SYSTEM_VERSION:   trusty
+      - put: ubuntu-trusty-tarball
+        params:
+          file: os-image/ubuntu-trusty.tgz
+          acl: public-read
+
+  - name: build-ubuntu-xenial
+    serial_groups: [ubuntu]
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - task: build
+        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      ubuntu
+          OPERATING_SYSTEM_VERSION:   xenial
+      - put: ubuntu-xenial-tarball
+        params:
+          file: os-image/ubuntu-xenial.tgz
+          acl: public-read
+
+  - name: build-centos-7
+    serial_groups: [ubuntu]
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - task: build
+        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      centos
+          OPERATING_SYSTEM_VERSION:   7
+      - put: centos-7-tarball
+        params:
+          file: os-image/centos-7.tgz
+          acl: public-read
+
+  - name: build-opensuse-leap
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - task: build
+        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      opensuse
+          OPERATING_SYSTEM_VERSION:   leap
+          TARGET_USER:                user
+      - put: opensuse-leap-os-image
+        params:
+          file: os-image/opensuse-leap.tgz
+          acl: public-read
+
+  - name: build-sle-12
+    plan:
+      - get: sle-bosh-linux-stemcell-builder
+        trigger: true
+      - task: build
+        file: sle-bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
+        input_mapping:
+          bosh-linux-stemcell-builder: sle-bosh-linux-stemcell-builder
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      sles
+          OPERATING_SYSTEM_VERSION:   12
+          TARGET_USER:                user
+      - put: sle-12-os-image
+        params:
+          file: os-image/sles-12.tgz
+          acl: public-read
+
+resources:
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: {{repo}}
+      branch: {{branch}}
+
+  - name: sle-bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: ((sle_repo))
+      branch: ((sle_branch))
+
+  #
+  # ubuntu-trusty
+  #
+
+  - name: ubuntu-trusty-tarball
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-ubuntu-trusty-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
+
+  #
+  # ubuntu-xenial
+  #
+  - name: ubuntu-xenial-tarball
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-ubuntu-xenial-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
+
+  #
+  # centos-7
+  #
+
+  - name: centos-7-tarball
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-centos-7-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
+
+  #
+  # opensuse
+  #
+
+  - name: opensuse-leap-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-opensuse-leap-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
+
+  #
+  # sle
+  #
+
+  - name: sle-12-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-sle-12-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}

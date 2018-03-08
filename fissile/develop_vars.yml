@@ -1,0 +1,9 @@
+os-image-tag-prefix-ubuntu: "develop-"
+os-image-tag-prefix-opensuse: "develop-"
+os-image-tag-prefix-sle: "develop-"
+
+fissile-tag-prefix-ubuntu: "develop-"
+fissile-tag-prefix-sle: "develop-"
+fissile-tag-prefix-opensuse: "develop-"
+
+tag-as-latest: false

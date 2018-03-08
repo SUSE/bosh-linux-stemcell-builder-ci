@@ -1,0 +1,54 @@
+---
+jobs:
+  - name: start-job
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+
+  - name: build-opensuse-leap
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+        passed:
+          - start-job
+      - get: suse-build-opensuse-task
+      - task: build
+        file: suse-build-opensuse-task/ci/pipelines/bosh-stemcell-master/os-images/build-opensuse-task.yml
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      opensuse
+          OPERATING_SYSTEM_VERSION:   leap
+          TARGET_USER:                user
+      - put: opensuse-leap-os-image
+        params:
+          file: os-image/opensuse-leap.tgz
+          acl: public-read
+
+resources:
+  - name: suse-build-opensuse-task
+    type: git
+    source:
+      uri: git@github.com:SUSE/cloudfoundry
+      branch: bosh_stemcell_pipelines
+      private_key: {{github-private-key}}
+      path: ["ci/pipelines/bosh-stemcell-master/os-images/build-opensuse-task.*"]
+
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: {{repo}}
+      branch: {{branch}}
+
+  #
+  # opensuse
+  #
+
+  - name: opensuse-leap-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-opensuse-leap-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}

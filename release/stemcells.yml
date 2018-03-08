@@ -1,0 +1,431 @@
+
+# shared:
+  # - &deploy-director
+  #   task: deploy-director
+  #   file: bosh-linux-stemcell-builder/ci/bats/tasks/deploy-director.yml
+  #   params:
+  #     BAT_INFRASTRUCTURE: vsphere
+
+  # - &prepare-bats-config
+  #   task: prepare-bats
+  #   file: bosh-linux-stemcell-builder/ci/bats/iaas/vsphere/prepare-bats-config.yml
+
+  # - &run-bats
+  #   task: run-bats
+  #   file: bats/ci/tasks/run-bats.yml
+
+  # - &teardown
+  #   task: teardown
+  #   file: bosh-linux-stemcell-builder/ci/bats/tasks/destroy-director.yml
+
+jobs:
+  - name: test-unit
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+      - get: opensuse-leap-os-image
+        trigger: true
+      - task: test-unit
+        file: bosh-linux-stemcell-builder/ci/tasks/test-unit.yml
+
+  - name: build-stemcell
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+        passed:
+          - test-unit
+      - get: version
+        params:
+          bump: {{stemcell-version-semver-bump}}
+      - put: version
+        params:
+          file: version/number
+
+  # WARDEN
+  #
+
+  - name: build-warden-boshlite-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         warden
+          HYPERVISOR:   boshlite
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: warden-boshlite-opensuse-leap
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  #
+  # AWS
+  #
+
+  - name: build-aws-xen-hvm-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         aws
+          HYPERVISOR:   xen-hvm
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: aws-xen-hvm-opensuse-leap
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+
+  #
+  # Azure
+  #
+
+  - name: build-azure-hyperv-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         azure
+          HYPERVISOR:   hyperv
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: azure-hyperv-opensuse-leap
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  #
+  # Google
+  #
+
+  - name: build-google-kvm-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         google
+          HYPERVISOR:   kvm
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: google-kvm-opensuse-leap
+          params:
+            file: stemcell/*-go_agent.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  #
+  # OpenStack
+  #
+
+  - name: build-openstack-kvm-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         openstack
+          HYPERVISOR:   kvm
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: openstack-kvm-opensuse-leap-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: openstack-kvm-opensuse-leap
+          params:
+            file: stemcell/*-go_agent.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+
+  #
+  # vSphere
+  #
+
+  - name: build-vsphere-esxi-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         vsphere
+          HYPERVISOR:   esxi
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: vsphere-esxi-opensuse-leap
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  #
+  # vCloud
+  #
+
+  - name: build-vcloud-esxi-opensuse-leap
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: opensuse-leap-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: opensuse-leap-os-image
+        privileged: true
+        params:
+          IAAS:         vcloud
+          HYPERVISOR:   esxi
+          OS_NAME:      opensuse
+          OS_VERSION:   leap
+      - aggregate:
+        - put: vcloud-esxi-opensuse-leap
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+resources:
+
+  - name: suse-ci
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
+      private_key: {{github-private-key}}
+
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: {{repo}}
+      branch: {{branch}}
+
+  # TODO re-using existing repo for testing and because it's currently unused
+  - name: stemcells-index
+    type: git
+    source:
+      uri: git@github.com:SUSE/cat-pools
+      branch: stemcells-index
+      private_key: {{github-private-key}}
+
+  - name: version
+    type: semver
+    source:
+      driver: s3
+      key: {{stemcell-version-key}}
+      bucket: {{stemcell-aws-bucket}}
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+      initial_version: 166.0.0
+
+  #
+  # Stemcells
+  #
+
+  #
+  # AWS
+  #
+
+  - name: aws-xen-hvm-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/aws/bosh-stemcell-(.+)-aws-xen-hvm-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # Azure
+  #
+
+  - name: azure-hyperv-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/azure/bosh-stemcell-(.+)-azure-hyperv-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # vSphere
+  #
+
+  - name: vsphere-esxi-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/vsphere/bosh-stemcell-(.+)-vsphere-esxi-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # Google
+  #
+
+  - name: google-kvm-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/google/bosh-stemcell-(.+)-google-kvm-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # Openstack
+  #
+
+  - name: openstack-kvm-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  - name: openstack-kvm-opensuse-leap-raw
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/openstack/bosh-stemcell-(.+)-openstack-kvm-opensuse-leap-go_agent-raw.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # vCloud
+  #
+
+  - name: vcloud-esxi-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/vcloud/bosh-stemcell-(.+)-vcloud-esxi-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # Warden
+  #
+
+  - name: warden-boshlite-opensuse-leap
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/warden/bosh-stemcell-(.+)-warden-boshlite-opensuse-leap-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  - name: opensuse-leap-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-opensuse-leap-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
