@@ -21,6 +21,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/misc/dns.yml \
   -o bosh-deployment/external-ip-with-registry-not-recommended.yml \
   -o bosh-linux-stemcell-builder/ci/assets/local-stemcell.yml \
+  -o suse-ci/assets/ops/custom-flavor.yml \
   --vars-store director-creds.yml \
   -v director_name=stemcell-smoke-tests-director \
   -v internal_dns="[$BOSH_dns_recursor_ip]" \

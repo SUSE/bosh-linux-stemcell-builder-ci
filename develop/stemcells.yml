@@ -1,23 +1,46 @@
 
 shared:
   - tags: &tags ['eng-provo']
-  # - &deploy-director
-  #   task: deploy-director
-  #   file: bosh-linux-stemcell-builder/ci/bats/tasks/deploy-director.yml
-  #   params:
-  #     BAT_INFRASTRUCTURE: vsphere
 
-  # - &prepare-bats-config
-  #   task: prepare-bats
-  #   file: bosh-linux-stemcell-builder/ci/bats/iaas/vsphere/prepare-bats-config.yml
+  - &deploy-director
+    task: deploy-director
+    tags: *tags
+    file: suse-ci/tasks/bats/deploy-director.yml
+    params: &director-params
+      BAT_INFRASTRUCTURE:             openstack
+      BOSH_external_ip:               {{openstack-external-ip}}
+      BOSH_dns_recursor_ip:           {{openstack-dns-recursor-ip}}
+      BOSH_internal_ip:               {{openstack-internal-ip}}
+      BOSH_internal_cidr:             {{openstack-internal-cidr}}
+      BOSH_internal_gw:               {{openstack-internal-gw}}
+      BOSH_net_id:                    {{openstack-net-id}}
+      BOSH_reserved_range:            {{openstack-reserved-range}}
+      BOSH_auth_url:                  {{openstack-auth-url}}
+      BOSH_az:                        {{openstack-az}}
+      BOSH_default_key_name:          {{openstack-default-key-name}}
+      BOSH_default_security_groups:   {{openstack-default-security-groups}}
+      BOSH_openstack_password:        {{openstack-password}}
+      BOSH_openstack_username:        {{openstack-username}}
+      BOSH_openstack_domain:          {{openstack-domain}}
+      BOSH_openstack_project:         {{openstack-project}}
+      BOSH_region:                    {{openstack-region}}
+      BOSH_private_key_data:          {{openstack-private-key-data}}
+      BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
 
-  # - &run-bats
-  #   task: run-bats
-  #   file: bats/ci/tasks/run-bats.yml
+  - &prepare-bats-config
+    task: prepare-bats
+    tags: *tags
+    file: suse-ci/tasks/bats/prepare-bats-config.yml
 
-  # - &teardown
-  #   task: teardown
-  #   file: bosh-linux-stemcell-builder/ci/bats/tasks/destroy-director.yml
+  - &run-bats
+    task: run-bats
+    tags: *tags
+    file: bats/ci/tasks/run-bats.yml
+
+  - &teardown
+    task: teardown
+    tags: *tags
+    file: bosh-linux-stemcell-builder/ci/bats/tasks/destroy-director.yml
 
 jobs:
   - name: test-unit
@@ -87,24 +110,7 @@ jobs:
             file: suse-ci/tasks/deploy-director.yml
             input_mapping:
               stemcell: openstack-kvm-ubuntu-trusty
-            params:
-              BOSH_external_ip:               {{openstack-external-ip}}
-              BOSH_internal_ip:               {{openstack-internal-ip}}
-              BOSH_internal_cidr:             {{openstack-internal-cidr}}
-              BOSH_internal_gw:               {{openstack-internal-gw}}
-              BOSH_net_id:                    {{openstack-net-id}}
-              BOSH_reserved_range:            {{openstack-reserved-range}}
-              BOSH_auth_url:                  {{openstack-auth-url}}
-              BOSH_az:                        {{openstack-az}}
-              BOSH_default_key_name:          {{openstack-default-key-name}}
-              BOSH_default_security_groups:   {{openstack-default-security-groups}}
-              BOSH_openstack_password:        {{openstack-password}}
-              BOSH_openstack_username:        {{openstack-username}}
-              BOSH_openstack_domain:          {{openstack-domain}}
-              BOSH_openstack_project:         {{openstack-project}}
-              BOSH_region:                    {{openstack-region}}
-              BOSH_private_key_data:          {{openstack-private-key-data}}
-              BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
+            params: *director-params
 
           - task: test-stemcell
             tags: *tags
@@ -595,11 +601,73 @@ jobs:
           repository: stemcells-index
           rebase: true
 
+  - name: bats-ubuntu
+    serial: true
+    plan:
+    - do:
+      - aggregate:
+        - { get: suse-ci, tags: *tags }
+        - { get: bosh-release, tags: *tags }
+        - { get: cpi-release, tags: *tags }
+        - get: stemcell
+          tags: *tags
+          trigger: true
+          resource: openstack-kvm-ubuntu-trusty
+          passed:
+            - build-openstack-kvm-ubuntu-trusty
+        - { get: bosh-cli, tags: *tags }
+        - { get: bats, tags: *tags }
+        - { get: bosh-deployment, tags: *tags }
+        - get: bosh-linux-stemcell-builder
+          tags: *tags
+          passed:
+            #- build-warden-boshlite-ubuntu-trusty
+            #- build-aws-xen-hvm-ubuntu-trusty
+            #- build-azure-hyperv-ubuntu-trusty
+            #- build-google-kvm-ubuntu-trusty
+            - build-openstack-kvm-ubuntu-trusty
+            #- build-vsphere-esxi-ubuntu-trusty
+            #- build-vcloud-esxi-ubuntu-trusty
+        - get: version
+          tags: *tags
+          passed:
+            #- build-warden-boshlite-ubuntu-trusty
+            #- build-aws-xen-hvm-ubuntu-trusty
+            #- build-azure-hyperv-ubuntu-trusty
+            #- build-google-kvm-ubuntu-trusty
+            - build-openstack-kvm-ubuntu-trusty
+            #- build-vsphere-esxi-ubuntu-trusty
+            #- build-vcloud-esxi-ubuntu-trusty
+
+        - {put: environment, tags: *tags, params: {acquire: true}}
+
+      - do:
+        - <<: *deploy-director
+
+        - <<: *prepare-bats-config
+          params:
+            STEMCELL_NAME: bosh-openstack-kvm-ubuntu-trusty-go_agent
+            BATS_floating_ip:               {{bats-floating-ip}}
+            BATS_default_security_groups:   {{openstack-default-security-groups}}
+            BATS_net_id:                    {{openstack-net-id}}
+            BATS_az:                        {{openstack-az}}
+            BATS_instance_type:             {{bats-instance-type}}
+            BATS_flavor_with_no_ephemeral_disk: {{bats-flavor-with-no-ephemeral-disk}}
+
+        - <<: *run-bats
+        ensure:
+          do:
+          - <<: *teardown
+      ensure:
+        do:
+        - {put: environment, tags: *tags, params: {release: environment}}
+
 resources:
 
   - name: suse-ci
     type: git
     source:
+      branch: master
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
       private_key: {{github-private-key}}
 
@@ -608,6 +676,16 @@ resources:
     source:
       uri: {{repo}}
       branch: {{branch}}
+
+  - name: bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
+  - name: cpi-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry-incubator/bosh-openstack-cpi-release
 
   - name: bosh-deployment
     type: git
@@ -621,6 +699,12 @@ resources:
       regexp: bosh-cli-([0-9.]+)-linux-amd64
       bucket: bosh-cli-artifacts
       region_name: us-east-1
+
+  - name: bats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
+      branch: gocli-bats
 
   # # TODO re-using existing repo for testing and because it's currently unused
   - name: environment
