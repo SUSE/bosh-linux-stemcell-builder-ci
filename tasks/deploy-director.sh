@@ -18,10 +18,12 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/openstack/custom-ca.yml \
   -o bosh-deployment/jumpbox-user.yml \
+  -o bosh-deployment/misc/dns.yml \
   -o bosh-deployment/external-ip-with-registry-not-recommended.yml \
   -o bosh-linux-stemcell-builder/ci/assets/local-stemcell.yml \
   --vars-store director-creds.yml \
   -v director_name=stemcell-smoke-tests-director \
+  -v internal_dns="[$BOSH_dns_recursor_ip]" \
   --var-file=private_key=<(echo "$BOSH_private_key_data") \
   --var-file=openstack_ca_cert=<(echo "$BOSH_openstack_ca_cert_data") \
   --vars-env "BOSH" > director.yml
