@@ -1,0 +1,21 @@
+# Example
+auth_url = "https://example.com"
+domain_name = "Default"
+user_name = "cloudfoundry"
+password = "XXX"
+tenant_name = "cloudfoundry"
+region_name = "CustomRegion"
+availability_zone = "nova"
+
+ext_net_name = "floating"
+ext_net_id = "1234-5678"
+
+# in case your OpenStack needs custom nameservers
+# dns_nameservers = 8.8.8.8
+
+# Disambiguate keypairs with this suffix
+# keypair_suffix = "<keypair_suffix>"
+
+# in case of self signed certificate select one of the following options
+# cacert_file = "<path-to-certificate>"
+# insecure = "true"

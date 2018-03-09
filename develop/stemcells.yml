@@ -52,6 +52,75 @@ jobs:
         trigger: true
       - get: version
 
+  - name: test-stemcells
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: version
+            trigger: true
+            passed:
+              # - build-warden-boshlite-ubuntu-trusty
+              # - build-aws-xen-hvm-ubuntu-trusty
+              # - build-azure-hyperv-ubuntu-trusty
+              # - build-google-kvm-ubuntu-trusty
+              - build-openstack-kvm-ubuntu-trusty
+              # - build-vsphere-esxi-ubuntu-trusty
+              # - build-vcloud-esxi-ubuntu-trusty
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+          - get: bosh-deployment
+          - get: bosh-cli
+          - get: syslog-release
+          - get: os-conf-release
+          - get: openstack-kvm-ubuntu-trusty
+            passed: [build-openstack-kvm-ubuntu-trusty]
+        - put: environment
+          params:
+            acquire: true
+
+        - do:
+          - task: deploy-director
+            file: suse-ci/tasks/deploy-director.yml
+            input_mapping:
+              stemcell: openstack-kvm-ubuntu-trusty
+            params:
+              BOSH_external_ip:               {{openstack-external-ip}}
+              BOSH_internal_ip:               {{openstack-internal-ip}}
+              BOSH_internal_cidr:             {{openstack-internal-cidr}}
+              BOSH_internal_gw:               {{openstack-internal-gw}}
+              BOSH_net_id:                    {{openstack-net-id}}
+              BOSH_reserved_range:            {{openstack-reserved-range}}
+              BOSH_auth_url:                  {{openstack-auth-url}}
+              BOSH_az:                        {{openstack-az}}
+              BOSH_default_key_name:          {{openstack-default-key-name}}
+              BOSH_default_security_groups:   {{openstack-default-security-groups}}
+              BOSH_openstack_password:        {{openstack-password}}
+              BOSH_openstack_username:        {{openstack-username}}
+              BOSH_openstack_domain:          {{openstack-domain}}
+              BOSH_openstack_project:         {{openstack-project}}
+              BOSH_region:                    {{openstack-region}}
+              BOSH_private_key_data:          {{openstack-private-key-data}}
+              BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
+
+          - task: test-stemcell
+            file: suse-ci/tasks/test-stemcell.yml
+            input_mapping:
+              stemcell: openstack-kvm-ubuntu-trusty
+            params:
+              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
+              BOSH_os_name: ubuntu-trusty
+              package: ipv4director
+          ensure:
+            task: teardown
+            file: bosh-linux-stemcell-builder/ci/tasks/teardown.yml
+            params:
+              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
+        ensure:
+          put: environment
+          params:
+            release: environment
+
   # WARDEN
   #
 
@@ -534,6 +603,39 @@ resources:
     source:
       uri: {{repo}}
       branch: {{branch}}
+
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment
+      branch: master
+
+  - name: bosh-cli
+    type: s3
+    source:
+      regexp: bosh-cli-([0-9.]+)-linux-amd64
+      bucket: bosh-cli-artifacts
+      region_name: us-east-1
+
+  # # TODO re-using existing repo for testing and because it's currently unused
+  - name: environment
+    type: pool
+    source:
+      pool: openstack
+      uri: git@github.com:SUSE/cat-pools
+      branch: master
+      private_key: {{github-private-key}}
+
+
+  - name: syslog-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/syslog-release
+
+  - name: os-conf-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/os-conf-release
 
   # TODO re-using existing repo for testing and because it's currently unused
   - name: stemcells-index
