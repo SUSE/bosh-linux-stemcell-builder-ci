@@ -17,6 +17,7 @@ chmod +x $bosh_cli
 $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/openstack/custom-ca.yml \
+  -o bosh-deployment/jumpbox-user.yml \
   -o bosh-deployment/external-ip-with-registry-not-recommended.yml \
   -o bosh-linux-stemcell-builder/ci/assets/local-stemcell.yml \
   --vars-store director-creds.yml \

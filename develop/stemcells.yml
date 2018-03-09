@@ -1,5 +1,6 @@
 
-# shared:
+shared:
+  - tags: &tags ['eng-provo']
   # - &deploy-director
   #   task: deploy-director
   #   file: bosh-linux-stemcell-builder/ci/bats/tasks/deploy-director.yml
@@ -67,13 +68,14 @@ jobs:
               - build-openstack-kvm-ubuntu-trusty
               # - build-vsphere-esxi-ubuntu-trusty
               # - build-vcloud-esxi-ubuntu-trusty
-          - get: suse-ci
-          - get: bosh-linux-stemcell-builder
-          - get: bosh-deployment
-          - get: bosh-cli
-          - get: syslog-release
-          - get: os-conf-release
+          - { get: suse-ci, tags: *tags }
+          - { get: bosh-linux-stemcell-builder, tags: *tags }
+          - { get: bosh-deployment, tags: *tags }
+          - { get: bosh-cli, tags: *tags }
+          - { get: syslog-release, tags: *tags }
+          - { get: os-conf-release, tags: *tags }
           - get: openstack-kvm-ubuntu-trusty
+            tags: *tags
             passed: [build-openstack-kvm-ubuntu-trusty]
         - put: environment
           params:
@@ -81,6 +83,7 @@ jobs:
 
         - do:
           - task: deploy-director
+            tags: *tags
             file: suse-ci/tasks/deploy-director.yml
             input_mapping:
               stemcell: openstack-kvm-ubuntu-trusty
@@ -104,6 +107,7 @@ jobs:
               BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
 
           - task: test-stemcell
+            tags: *tags
             file: suse-ci/tasks/test-stemcell.yml
             input_mapping:
               stemcell: openstack-kvm-ubuntu-trusty
@@ -113,6 +117,7 @@ jobs:
               package: ipv4director
           ensure:
             task: teardown
+            tags: *tags
             file: bosh-linux-stemcell-builder/ci/tasks/teardown.yml
             params:
               BOSH_ENVIRONMENT:               {{openstack-external-ip}}

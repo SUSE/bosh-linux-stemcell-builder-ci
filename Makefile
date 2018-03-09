@@ -1,6 +1,6 @@
 TARGET ?= suse.de
 CONCOURSE_SECRETS_FILE ?= ../cloudfoundry/secure/concourse-secrets.yml.gpg
-OPENSTACK_DEVELOP_VARS_FILE ?= ../cloudfoundry/engcloud.prv.suse.net/terraform/develop/vars.yml
+TERRAFORM_DATA_DIR ?= ../cloudfoundry/engcloud.prv.suse.net/terraform
 
 all: release develop regression
 
@@ -29,7 +29,7 @@ develop-os-images:
 	fly -t ${TARGET} expose-pipeline -p bosh:develop:os-images
 
 develop-stemcells:
-	bash -c "fly -t ${TARGET} set-pipeline -n -c develop/stemcells.yml -p bosh:develop:stemcells -l develop/vars.yml -l shared_vars.yml -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) -l ${OPENSTACK_DEVELOP_VARS_FILE}"
+	bash -c "fly -t ${TARGET} set-pipeline -n -c develop/stemcells.yml -p bosh:develop:stemcells -l develop/vars.yml -l shared_vars.yml -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) -l ${TERRAFORM_DATA_DIR}/develop/vars.yml --var=openstack-private-key-data=\"`cat ${TERRAFORM_DATA_DIR}/develop/bosh.pem`\""
 	fly -t ${TARGET} unpause-pipeline -p bosh:develop:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:develop:stemcells
 
