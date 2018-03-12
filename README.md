@@ -16,7 +16,7 @@ The os-images pipeline is also building the `ubuntu:trusty` and `sle:12` images 
 
 ## Development Set (`bosh:develop` namespace)
 
-Uses the `develop` branch of our bosh-linux-stemcell-builder fork (TODO: Create the `develop` branch the update the pipeline).
+Uses the `develop` branch of our bosh-linux-stemcell-builder fork.
 New builds are triggered by merges to develop or by rpm updates to the os-images.
 The set is comprised of 2 pipelines:
 - os-images
