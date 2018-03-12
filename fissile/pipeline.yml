@@ -49,6 +49,7 @@ jobs:
     plan:
       - get: ci
       - get: semver.os-image-ubuntu
+        trigger: true
         passed:
           - upload-os-image-to-docker-ubuntu-trusty
       - get: git.fissile-stemcell-ubuntu
@@ -80,6 +81,7 @@ jobs:
     plan:
       - get: ci
       - get: semver.os-image-opensuse
+        trigger: true
         passed:
           - upload-os-image-to-docker-opensuse-leap
       - get: git.fissile-stemcell-opensuse
@@ -111,6 +113,7 @@ jobs:
     plan:
       - get: ci
       - get: semver.os-image-sle12
+        trigger: true
         passed:
           - upload-os-image-to-docker-sle-12
       - get: git.fissile-stemcell-sle
