@@ -74,6 +74,7 @@ jobs:
           tag_prefix: ((fissile-tag-prefix-ubuntu))
           tag: versioned-fissile-stemcell-ubuntu/VERSION
           build_args_file: build_args/json
+          tag_as_latest: ((tag-as-latest))
         get_params:
           skip_download: true
 
@@ -106,6 +107,7 @@ jobs:
           tag_prefix: ((fissile-tag-prefix-opensuse))
           tag: versioned-fissile-stemcell-opensuse/VERSION
           build_args_file: build_args/json
+          tag_as_latest: ((tag-as-latest))
         get_params:
           skip_download: true
 
@@ -138,6 +140,7 @@ jobs:
           tag_prefix: ((fissile-tag-prefix-sle))
           tag: versioned-fissile-stemcell-sles/VERSION
           build_args_file: build_args/json
+          tag_as_latest: ((tag-as-latest))
         get_params:
           skip_download: true
 
