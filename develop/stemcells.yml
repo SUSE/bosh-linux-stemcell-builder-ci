@@ -76,7 +76,7 @@ jobs:
         trigger: true
       - get: version
 
-  - name: test-stemcells
+  - name: test-stemcells-suse
     serial: true
     plan:
       - do:
@@ -84,13 +84,57 @@ jobs:
           - get: version
             trigger: true
             passed:
-              # - build-warden-boshlite-ubuntu-trusty
-              # - build-aws-xen-hvm-ubuntu-trusty
-              # - build-azure-hyperv-ubuntu-trusty
-              # - build-google-kvm-ubuntu-trusty
+              - build-openstack-kvm-opensuse-leap
+          - { get: suse-ci, tags: *tags }
+          - { get: bosh-linux-stemcell-builder, tags: *tags }
+          - { get: bosh-deployment, tags: *tags }
+          - { get: bosh-cli, tags: *tags }
+          - { get: syslog-release, tags: *tags }
+          - { get: os-conf-release, tags: *tags }
+          - get: openstack-kvm-opensuse-leap
+            tags: *tags
+            passed: [build-openstack-kvm-opensuse-leap]
+        - put: environment
+          params:
+            acquire: true
+
+        - do:
+          - task: deploy-director
+            tags: *tags
+            file: suse-ci/tasks/deploy-director.yml
+            input_mapping:
+              stemcell: openstack-kvm-opensuse-leap
+            params: *director-params
+
+          - task: test-stemcell
+            tags: *tags
+            file: suse-ci/tasks/test-stemcell.yml
+            input_mapping:
+              stemcell: openstack-kvm-opensuse-leap
+            params:
+              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
+              BOSH_os_name: opensuse-leap
+              package: ipv4director
+          ensure:
+            task: teardown
+            tags: *tags
+            file: bosh-linux-stemcell-builder/ci/tasks/teardown.yml
+            params:
+              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
+        ensure:
+          put: environment
+          params:
+            release: environment
+
+  - name: test-stemcells-ubuntu
+    serial: true
+    plan:
+      - do:
+        - aggregate:
+          - get: version
+            trigger: true
+            passed:
               - build-openstack-kvm-ubuntu-trusty
-              # - build-vsphere-esxi-ubuntu-trusty
-              # - build-vcloud-esxi-ubuntu-trusty
           - { get: suse-ci, tags: *tags }
           - { get: bosh-linux-stemcell-builder, tags: *tags }
           - { get: bosh-deployment, tags: *tags }
@@ -600,6 +644,55 @@ jobs:
         params:
           repository: stemcells-index
           rebase: true
+
+  - name: bats-suse
+    serial: true
+    plan:
+    - do:
+      - aggregate:
+        - { get: suse-ci, tags: *tags }
+        - { get: bosh-release, tags: *tags }
+        - { get: cpi-release, tags: *tags }
+        - get: stemcell
+          tags: *tags
+          trigger: true
+          resource: openstack-kvm-opensuse-leap
+          passed:
+            - build-openstack-kvm-opensuse-leap
+        - { get: bosh-cli, tags: *tags }
+        - { get: bats, tags: *tags }
+        - { get: bosh-deployment, tags: *tags }
+        - get: bosh-linux-stemcell-builder
+          tags: *tags
+          passed:
+            - build-openstack-kvm-opensuse-leap
+        - get: version
+          tags: *tags
+          passed:
+            - build-openstack-kvm-opensuse-leap
+
+        - {put: environment, tags: *tags, params: {acquire: true}}
+
+      - do:
+        - <<: *deploy-director
+
+        - <<: *prepare-bats-config
+          params:
+            STEMCELL_NAME: bosh-openstack-kvm-opensuse-leap-go_agent
+            BATS_floating_ip:               {{bats-floating-ip}}
+            BATS_default_security_groups:   {{openstack-default-security-groups}}
+            BATS_net_id:                    {{openstack-net-id}}
+            BATS_az:                        {{openstack-az}}
+            BATS_instance_type:             {{bats-instance-type}}
+            BATS_flavor_with_no_ephemeral_disk: {{bats-flavor-with-no-ephemeral-disk}}
+
+        - <<: *run-bats
+        ensure:
+          do:
+          - <<: *teardown
+      ensure:
+        do:
+        - {put: environment, tags: *tags, params: {release: environment}}
 
   - name: bats-ubuntu
     serial: true

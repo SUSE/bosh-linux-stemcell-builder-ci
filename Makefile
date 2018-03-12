@@ -12,7 +12,7 @@ release-os-images:
 	fly -t ${TARGET} expose-pipeline -p bosh:release:os-images
 
 release-stemcells:
-	bash -c "fly -t ${TARGET} set-pipeline -n -c release/stemcells.yml -p bosh:release:stemcells -l release/vars.yml -l shared_vars.yml -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+	bash -c "fly -t ${TARGET} set-pipeline -n -c release/stemcells.yml -p bosh:release:stemcells -l release/vars.yml -l shared_vars.yml -l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) -l ${TERRAFORM_DATA_DIR}/release/vars.yml -v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/release/bosh.pem.gpg`\""
 	fly -t ${TARGET} unpause-pipeline -p bosh:release:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:release:stemcells
 
