@@ -9,7 +9,3 @@ stemcell-aws-directory: develop/stemcells
 
 stemcell-version-key: develop/stemcells/version
 stemcell-version-semver-bump: major
-
-bats-floating-ip: 10.86.0.37
-bats-instance-type: d2.small
-bats-flavor-with-no-ephemeral-disk: m1.small
