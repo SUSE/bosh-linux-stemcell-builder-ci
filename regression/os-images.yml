@@ -12,9 +12,9 @@ jobs:
         trigger: true
         passed:
           - start-job
-      - get: suse-build-opensuse-task
+      - get: suse-ci
       - task: build
-        file: suse-build-opensuse-task/ci/pipelines/bosh-stemcell-master/os-images/build-opensuse-task.yml
+        file: suse-ci/ci/pipelines/bosh-stemcell-master/os-images/build-opensuse-task.yml
         privileged: true
         params:
           OPERATING_SYSTEM_NAME:      opensuse
@@ -26,7 +26,7 @@ jobs:
           acl: public-read
 
 resources:
-  - name: suse-build-opensuse-task
+  - name: suse-ci
     type: git
     source:
       uri: git@github.com:SUSE/cloudfoundry
