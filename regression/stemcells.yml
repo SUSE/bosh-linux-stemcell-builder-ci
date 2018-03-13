@@ -23,7 +23,6 @@ jobs:
     serial: true
     plan:
       - get: bosh-linux-stemcell-builder
-      - get: os-image
         trigger: true
       - task: test-unit
         file: bosh-linux-stemcell-builder/ci/tasks/test-unit.yml
@@ -32,10 +31,10 @@ jobs:
     serial: true
     plan:
       - get: bosh-linux-stemcell-builder
-      - get: os-image
-        trigger: true
         passed:
           - test-unit
+      - get: os-image
+        trigger: true
       - get: version
         params:
           bump: {{stemcell-version-semver-bump}}
