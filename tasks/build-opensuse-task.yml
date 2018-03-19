@@ -7,14 +7,14 @@ image_resource:
     repository: splatform/suse-os-image-stemcell-builder
 
 inputs:
-  - name: suse-build-opensuse-task
+  - name: suse-ci
   - name: bosh-linux-stemcell-builder
 
 outputs:
 - name: os-image
 
 run:
-  path: suse-build-opensuse-task/ci/pipelines/bosh-stemcell-master/os-images/build-opensuse-task.sh
+  path: suse-ci/tasks/build-opensuse-task.sh
 
 params:
   OPERATING_SYSTEM_NAME:      replace-me
