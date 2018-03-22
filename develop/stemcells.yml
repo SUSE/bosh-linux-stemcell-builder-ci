@@ -211,7 +211,6 @@ jobs:
           rebase: true
 
   - name: build-warden-boshlite-opensuse-leap
-    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
@@ -277,7 +276,6 @@ jobs:
           rebase: true
 
   - name: build-aws-xen-hvm-opensuse-leap
-    serial_groups: [opensuse2]
     plan:
       - aggregate:
           - get: version
@@ -344,7 +342,6 @@ jobs:
           rebase: true
 
   - name: build-azure-hyperv-opensuse-leap
-    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
@@ -410,7 +407,6 @@ jobs:
           rebase: true
 
   - name: build-google-kvm-opensuse-leap
-    serial_groups: [opensuse2]
     plan:
       - aggregate:
           - get: version
@@ -479,7 +475,6 @@ jobs:
           rebase: true
 
   - name: build-openstack-kvm-opensuse-leap
-    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
@@ -549,7 +544,6 @@ jobs:
           rebase: true
 
   - name: build-vsphere-esxi-opensuse-leap
-    serial_groups: [opensuse2]
     plan:
       - aggregate:
           - get: version
@@ -615,7 +609,6 @@ jobs:
           rebase: true
 
   - name: build-vcloud-esxi-opensuse-leap
-    serial_groups: [opensuse1]
     plan:
       - aggregate:
           - get: version
