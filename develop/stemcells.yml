@@ -8,16 +8,10 @@ shared:
     file: suse-ci/tasks/bats/deploy-director.yml
     params: &director-params
       BAT_INFRASTRUCTURE:             openstack
-      BOSH_external_ip:               {{openstack-external-ip}}
       BOSH_dns_recursor_ip:           {{openstack-dns-recursor-ip}}
-      BOSH_internal_ip:               {{openstack-internal-ip}}
-      BOSH_internal_cidr:             {{openstack-internal-cidr}}
-      BOSH_internal_gw:               {{openstack-internal-gw}}
-      BOSH_net_id:                    {{openstack-net-id}}
       BOSH_reserved_range:            {{openstack-reserved-range}}
       BOSH_auth_url:                  {{openstack-auth-url}}
       BOSH_az:                        {{openstack-az}}
-      BOSH_default_key_name:          {{openstack-default-key-name}}
       BOSH_default_security_groups:   {{openstack-default-security-groups}}
       BOSH_openstack_password:        {{openstack-password}}
       BOSH_openstack_username:        {{openstack-username}}
