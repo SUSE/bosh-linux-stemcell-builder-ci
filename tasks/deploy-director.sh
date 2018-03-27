@@ -30,8 +30,6 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   --var-file=openstack_ca_cert=<(echo "$BOSH_openstack_ca_cert_data") \
   --vars-env "BOSH" > director.yml
 
-exit 1
-
 $bosh_cli create-env director.yml -l director-creds.yml
 
 # occasionally we get a race where director process hasn't finished starting
