@@ -6,6 +6,7 @@ source /etc/profile.d/chruby.sh
 chruby 2.1.7
 
 export BOSH_stemcell_path=$(realpath stemcell/*.tgz)
+source environment/metadata
 
 cat > director-creds.yml <<EOF
 internal_ip: $BOSH_internal_ip
@@ -28,6 +29,8 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   --var-file=private_key=<(echo "$BOSH_private_key_data") \
   --var-file=openstack_ca_cert=<(echo "$BOSH_openstack_ca_cert_data") \
   --vars-env "BOSH" > director.yml
+
+exit 1
 
 $bosh_cli create-env director.yml -l director-creds.yml
 
