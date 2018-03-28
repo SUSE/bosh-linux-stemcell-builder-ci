@@ -1,0 +1,3 @@
+- type: replace
+  path: /instance_groups/name=bosh/networks/name=((deployment_name))/static_ips?
+  value: [((static_ip))]

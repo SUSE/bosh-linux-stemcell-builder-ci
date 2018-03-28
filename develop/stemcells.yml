@@ -9,7 +9,6 @@ shared:
     params: &director-params
       BAT_INFRASTRUCTURE:             openstack
       BOSH_dns_recursor_ip:           {{openstack-dns-recursor-ip}}
-      BOSH_reserved_range:            {{openstack-reserved-range}}
       BOSH_auth_url:                  {{openstack-auth-url}}
       BOSH_az:                        {{openstack-az}}
       BOSH_default_security_groups:   {{openstack-default-security-groups}}
@@ -20,6 +19,7 @@ shared:
       BOSH_region:                    {{openstack-region}}
       BOSH_private_key_data:          {{openstack-private-key-data}}
       BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
+      BOSH_default_key_name:          bosh-concourse
 
   - &prepare-bats-config
     task: prepare-bats
@@ -34,7 +34,7 @@ shared:
   - &teardown
     task: teardown
     tags: *tags
-    file: bosh-linux-stemcell-builder/ci/bats/tasks/destroy-director.yml
+    file: suse-ci/tasks/destroy-director.yml
 
 jobs:
   - name: test-unit
@@ -80,7 +80,9 @@ jobs:
             passed:
               - build-openstack-kvm-opensuse-leap
           - { get: suse-ci, tags: *tags }
+          - { get: suse-cf, tags: *tags }
           - { get: bosh-linux-stemcell-builder, tags: *tags }
+          - { get: bosh-release, tags: *tags }
           - { get: bosh-deployment, tags: *tags }
           - { get: bosh-cli, tags: *tags }
           - { get: syslog-release, tags: *tags }
@@ -88,9 +90,8 @@ jobs:
           - get: openstack-kvm-opensuse-leap
             tags: *tags
             passed: [build-openstack-kvm-opensuse-leap]
-        - put: environment
-          params:
-            acquire: true
+
+          - {put: environment, tags: *tags, params: {acquire: true}}
 
         - do:
           - task: deploy-director
@@ -98,7 +99,9 @@ jobs:
             file: suse-ci/tasks/deploy-director.yml
             input_mapping:
               stemcell: openstack-kvm-opensuse-leap
-            params: *director-params
+            params:
+              <<: *director-params
+              BOSH_os_name: opensuse-leap
 
           - task: test-stemcell
             tags: *tags
@@ -106,19 +109,14 @@ jobs:
             input_mapping:
               stemcell: openstack-kvm-opensuse-leap
             params:
-              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
               BOSH_os_name: opensuse-leap
               package: ipv4director
           ensure:
-            task: teardown
-            tags: *tags
-            file: bosh-linux-stemcell-builder/ci/tasks/teardown.yml
-            params:
-              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
+            do:
+            - <<: *teardown
         ensure:
-          put: environment
-          params:
-            release: environment
+          do:
+          - {put: environment, tags: *tags, params: {release: environment}}
 
   - name: test-stemcells-ubuntu
     serial: true
@@ -130,7 +128,9 @@ jobs:
             passed:
               - build-openstack-kvm-ubuntu-trusty
           - { get: suse-ci, tags: *tags }
+          - { get: suse-cf, tags: *tags }
           - { get: bosh-linux-stemcell-builder, tags: *tags }
+          - { get: bosh-release, tags: *tags }
           - { get: bosh-deployment, tags: *tags }
           - { get: bosh-cli, tags: *tags }
           - { get: syslog-release, tags: *tags }
@@ -138,9 +138,8 @@ jobs:
           - get: openstack-kvm-ubuntu-trusty
             tags: *tags
             passed: [build-openstack-kvm-ubuntu-trusty]
-        - put: environment
-          params:
-            acquire: true
+
+          - {put: environment, tags: *tags, params: {acquire: true}}
 
         - do:
           - task: deploy-director
@@ -148,7 +147,9 @@ jobs:
             file: suse-ci/tasks/deploy-director.yml
             input_mapping:
               stemcell: openstack-kvm-ubuntu-trusty
-            params: *director-params
+            params:
+              <<: *director-params
+              BOSH_os_name: ubuntu-trusty
 
           - task: test-stemcell
             tags: *tags
@@ -156,19 +157,14 @@ jobs:
             input_mapping:
               stemcell: openstack-kvm-ubuntu-trusty
             params:
-              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
               BOSH_os_name: ubuntu-trusty
               package: ipv4director
           ensure:
-            task: teardown
-            tags: *tags
-            file: bosh-linux-stemcell-builder/ci/tasks/teardown.yml
-            params:
-              BOSH_ENVIRONMENT:               {{openstack-external-ip}}
+            do:
+            - <<: *teardown
         ensure:
-          put: environment
-          params:
-            release: environment
+          do:
+          - {put: environment, tags: *tags, params: {release: environment}}
 
   # WARDEN
   #
@@ -638,6 +634,7 @@ jobs:
     - do:
       - aggregate:
         - { get: suse-ci, tags: *tags }
+        - { get: suse-cf, tags: *tags }
         - { get: bosh-release, tags: *tags }
         - { get: cpi-release, tags: *tags }
         - get: stemcell
@@ -662,6 +659,9 @@ jobs:
 
       - do:
         - <<: *deploy-director
+          params:
+            <<: *director-params
+            BOSH_os_name: opensuse-leap
 
         - <<: *prepare-bats-config
           params:
@@ -687,6 +687,7 @@ jobs:
     - do:
       - aggregate:
         - { get: suse-ci, tags: *tags }
+        - { get: suse-cf, tags: *tags }
         - { get: bosh-release, tags: *tags }
         - { get: cpi-release, tags: *tags }
         - get: stemcell
@@ -723,6 +724,9 @@ jobs:
 
       - do:
         - <<: *deploy-director
+          params:
+            <<: *director-params
+            BOSH_os_name: ubuntu-trusty
 
         - <<: *prepare-bats-config
           params:
@@ -743,6 +747,13 @@ jobs:
         - {put: environment, tags: *tags, params: {release: environment}}
 
 resources:
+
+  - name: suse-cf
+    type: git
+    source:
+      branch: master
+      uri: git@github.com:SUSE/cloudfoundry
+      private_key: {{github-private-key}}
 
   - name: suse-ci
     type: git

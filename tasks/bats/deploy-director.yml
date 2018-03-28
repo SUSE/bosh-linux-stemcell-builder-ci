@@ -8,6 +8,7 @@ image_resource:
 
 inputs:
 - name: suse-ci
+- name: suse-cf
 - name: environment
 - name: bosh-linux-stemcell-builder
 - name: bosh-cli

@@ -5,6 +5,7 @@ set -eu
 export BOSH_BINARY_PATH=$(realpath bosh-cli/bosh-cli-*)
 chmod +x $BOSH_BINARY_PATH
 
+export BOSH_ENVIRONMENT=`$BOSH_BINARY_PATH int director-state/director.yml --path /instance_groups/name=bosh/networks/0/static_ips/0`
 export BOSH_CA_CERT=`$BOSH_BINARY_PATH int director-state/director-creds.yml --path /director_ssl/ca`
 export BOSH_CLIENT=admin
 export BOSH_CLIENT_SECRET=`$BOSH_BINARY_PATH int director-state/director-creds.yml --path /admin_password`
