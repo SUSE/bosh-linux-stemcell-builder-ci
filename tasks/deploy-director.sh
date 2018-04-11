@@ -73,8 +73,6 @@ export BOSH_CLIENT_SECRET=`$bosh_cli int director-creds.yml --path /admin_passwo
 
 $bosh_cli -n update-cloud-config bosh-deployment/openstack/cloud-config.yml \
           --ops-file bosh-linux-stemcell-builder/ci/assets/reserve-ips.yml \
-          -v internal_gw='10.0.1.1' \
-          -v internal_cidr='10.0.1.0/24' \
           --vars-env "BOSH"
 
 mv $HOME/.bosh director-state/
