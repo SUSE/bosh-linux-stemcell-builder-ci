@@ -3,8 +3,9 @@ networks:
   type: manual
   subnets:
   - range: ((internal_cidr))
-    reserved:	((reserved_range))
     gateway: ((internal_gw))
+    reserved:	((reserved_range))
+    static:	((static_range))
     dns: ((net_dns))
     cloud_properties:
       net_id: ((net_id))
