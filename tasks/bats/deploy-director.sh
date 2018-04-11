@@ -51,6 +51,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/misc/bosh-dev.yml \
   -o bosh-deployment/experimental/blobstore-https.yml \
   -o bosh-deployment/experimental/bpm.yml \
+  -o bosh-deployment/jumpbox-user.yml \
   -o suse-ci/assets/ops/rename-deployment.yml \
   -o suse-ci/assets/ops/rename-network.yml \
   -o suse-ci/assets/ops/rename-az.yml \
