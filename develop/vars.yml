@@ -8,4 +8,4 @@ osimage-aws-directory: develop/os-images
 stemcell-aws-directory: develop/stemcells
 
 stemcell-version-key: develop/stemcells/version
-stemcell-version-semver-bump: major
+stemcell-version-semver-bump: minor
