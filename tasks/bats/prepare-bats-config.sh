@@ -19,7 +19,7 @@ export BAT_PRIVATE_KEY="$( creds_path /jumpbox_ssh/private_key )"
 export BAT_DNS_HOST="$( state_path /instance_groups/name=bosh/networks/name=public/static_ips/0 2>/dev/null )"
 
 export BAT_INFRASTRUCTURE=openstack
-export BAT_NETWORKING=manual
+export BAT_NETWORKING=dynamic
 
 export BAT_RSPEC_FLAGS="--tag ~manual_networking --tag ~raw_ephemeral_storage"
 EOF
