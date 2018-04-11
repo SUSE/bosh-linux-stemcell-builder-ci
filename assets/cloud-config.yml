@@ -2,13 +2,12 @@ networks:
 - name: ((env_name))
   type: manual
   subnets:
-  - range: 10.0.1.0/24
+  - range: ((internal_cidr))
     reserved:	((reserved_range))
-    static:	((static_range))
-    gateway: 10.0.1.1
-    dns: [137.65.247.1]
+    gateway: ((internal_gw))
+    dns: ((net_dns))
     cloud_properties:
-      net_id: 7989b8a8-ab6f-4526-9769-4942088d6733
+      net_id: ((net_id))
       security_groups:
       - bosh-concourse
     azs: [default_az]
