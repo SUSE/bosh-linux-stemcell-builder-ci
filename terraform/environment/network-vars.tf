@@ -12,3 +12,11 @@ variable "dns_nameservers" {
   description = "Comma-separated list of DNS server IPs"
   default = "8.8.8.8"
 }
+
+variable "outer_bosh_router_id" {
+  description = "Outer bosh router id"
+}
+
+variable "environment_id" {
+  description = "Id of the environment"
+}
