@@ -24,9 +24,6 @@ export BOSH_CLIENT_SECRET=`$bosh_cli int suse-cf/engcloud.prv.suse.net/bosh/dire
 export BOSH_GW_PRIVATE_KEY=`$bosh_cli int suse-cf/engcloud.prv.suse.net/bosh/director-creds.yml --path /jumpbox_ssh/private_key`
 export BOSH_GW_USER=vcap
 export BOSH_GW_HOST=$BOSH_ENVIRONMENT
-export BOSH_internal_cidr=10.0.1.0/24
-export BOSH_internal_gw=10.0.1.1
-export BOSH_net_id=7989b8a8-ab6f-4526-9769-4942088d6733
 
 $bosh_cli -n update-config \
   --type cloud \
