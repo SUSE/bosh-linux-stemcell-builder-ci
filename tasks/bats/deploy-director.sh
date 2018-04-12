@@ -47,6 +47,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/local-bosh-release-tarball.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/openstack/custom-ca.yml \
+  -o bosh-deployment/misc/powerdns.yml \
   -o bosh-deployment/misc/dns.yml \
   -o bosh-deployment/misc/bosh-dev.yml \
   -o bosh-deployment/experimental/blobstore-https.yml \

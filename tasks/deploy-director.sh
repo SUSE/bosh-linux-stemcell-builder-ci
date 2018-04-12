@@ -39,6 +39,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/local-bosh-release-tarball.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/openstack/custom-ca.yml \
+  -o bosh_deployment/misc/powerdns.yml \
   -o bosh-deployment/misc/dns.yml \
   -o bosh-deployment/misc/bosh-dev.yml \
   -o bosh-deployment/experimental/blobstore-https.yml \
@@ -60,7 +61,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   --var-file=openstack_ca_cert=<(echo "$BOSH_openstack_ca_cert_data") \
   --vars-env "BOSH" > director.yml
 
-$bosh_cli -n deploy -d $(cat environment/name) -l director-creds.yml director.yml 
+$bosh_cli -n deploy -d $(cat environment/name) -l director-creds.yml director.yml
 
 # occasionally we get a race where director process hasn't finished starting
 # before nginx is reachable causing "Cannot talk to director..." messages.
