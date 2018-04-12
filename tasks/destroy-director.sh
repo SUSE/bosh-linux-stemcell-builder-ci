@@ -13,4 +13,4 @@ export BOSH_CLIENT_SECRET=`$bosh_cli int suse-cf/engcloud.prv.suse.net/bosh/dire
 $bosh_cli -n delete-deployment -d $(cat environment/name) --force
 $bosh_cli -n delete-config --type cloud --name $(cat environment/name)
 $bosh_cli -n clean-up
-$bosh_cli disks --orphaned --json | jq -r '.Tables[].Rows[] .disk_cid' | xargs -n1 $bosh_cli -n delete-disk
+$bosh_cli disks --orphaned --json | jq -r '.Tables[].Rows[] .disk_cid' | xargs -rn1 $bosh_cli -n delete-disk
