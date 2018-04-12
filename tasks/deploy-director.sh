@@ -49,6 +49,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o suse-ci/assets/ops/rename-az.yml \
   -o suse-ci/assets/ops/custom-stemcell.yml \
   -o suse-ci/assets/ops/custom-static-ip.yml \
+  -o suse-ci/assets/ops/custom-password.yml \
   --vars-store director-creds.yml \
   -v director_name=stemcell-smoke-tests-director \
   -v deployment_name=$(cat environment/name) \
