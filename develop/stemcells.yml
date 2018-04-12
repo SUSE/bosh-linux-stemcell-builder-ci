@@ -795,7 +795,6 @@ resources:
       uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
       branch: gocli-bats
 
-  # # TODO re-using existing repo for testing and because it's currently unused
   - name: environment
     type: pool
     source:
@@ -815,7 +814,6 @@ resources:
     source:
       repository: cloudfoundry/os-conf-release
 
-  # TODO re-using existing repo for testing and because it's currently unused
   - name: stemcells-index
     type: git
     source:
