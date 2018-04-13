@@ -1,22 +1,40 @@
 
-# shared:
-  # - &deploy-director
-  #   task: deploy-director
-  #   file: bosh-linux-stemcell-builder/ci/bats/tasks/deploy-director.yml
-  #   params:
-  #     BAT_INFRASTRUCTURE: vsphere
+shared:
+  - tags: &tags ['eng-provo']
 
-  # - &prepare-bats-config
-  #   task: prepare-bats
-  #   file: bosh-linux-stemcell-builder/ci/bats/iaas/vsphere/prepare-bats-config.yml
+  - &deploy-director
+    task: deploy-director
+    tags: *tags
+    file: suse-ci/tasks/bats/deploy-director.yml
+    params: &director-params
+      BAT_INFRASTRUCTURE:             openstack
+      BOSH_dns_recursor_ip:           {{openstack-dns-recursor-ip}}
+      BOSH_auth_url:                  {{openstack-auth-url}}
+      BOSH_az:                        {{openstack-az}}
+      BOSH_default_security_groups:   {{openstack-default-security-groups}}
+      BOSH_openstack_password:        {{openstack-password}}
+      BOSH_openstack_username:        {{openstack-username}}
+      BOSH_openstack_domain:          {{openstack-domain}}
+      BOSH_openstack_project:         {{openstack-project}}
+      BOSH_region:                    {{openstack-region}}
+      BOSH_private_key_data:          {{openstack-private-key-data}}
+      BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
+      BOSH_default_key_name:          bosh-concourse
 
-  # - &run-bats
-  #   task: run-bats
-  #   file: bats/ci/tasks/run-bats.yml
+  - &prepare-bats-config
+    task: prepare-bats
+    tags: *tags
+    file: suse-ci/tasks/bats/prepare-bats-config.yml
 
-  # - &teardown
-  #   task: teardown
-  #   file: bosh-linux-stemcell-builder/ci/bats/tasks/destroy-director.yml
+  - &run-bats
+    task: run-bats
+    tags: *tags
+    file: bats/ci/tasks/run-bats.yml
+
+  - &teardown
+    task: teardown
+    tags: *tags
+    file: suse-ci/tasks/destroy-director.yml
 
 jobs:
   - name: test-unit
@@ -215,6 +233,107 @@ jobs:
           repository: stemcells-index
           rebase: true
 
+  - name: test-openstack-opensuse
+    serial: true
+    serial_groups: [tests-suse]
+    plan:
+      - do:
+        - aggregate:
+          - get: version
+            trigger: true
+            passed:
+              - build-openstack-kvm-opensuse-leap
+          - { get: suse-ci, tags: *tags }
+          - { get: suse-cf, tags: *tags }
+          - { get: bosh-linux-stemcell-builder, tags: *tags }
+          - { get: bosh-release, tags: *tags }
+          - { get: bosh-deployment, tags: *tags }
+          - { get: bosh-cli, tags: *tags }
+          - { get: syslog-release, tags: *tags }
+          - { get: os-conf-release, tags: *tags }
+          - get: openstack-kvm-opensuse-leap
+            tags: *tags
+            passed: [build-openstack-kvm-opensuse-leap]
+
+          - {put: environment, tags: *tags, params: {acquire: true}}
+
+        - do:
+          - task: deploy-director
+            tags: *tags
+            file: suse-ci/tasks/deploy-director.yml
+            input_mapping:
+              stemcell: openstack-kvm-opensuse-leap
+            params:
+              <<: *director-params
+              BOSH_os_name: opensuse-leap
+
+          - task: test-stemcell
+            tags: *tags
+            file: suse-ci/tasks/test-stemcell.yml
+            input_mapping:
+              stemcell: openstack-kvm-opensuse-leap
+            params:
+              BOSH_os_name: opensuse-leap
+              package: ipv4director
+          ensure:
+            do:
+            - <<: *teardown
+        ensure:
+          do:
+          - {put: environment, tags: *tags, params: {release: environment}}
+
+  - name: bats-openstack-opensuse
+    serial: true
+    serial_groups: [tests-suse]
+    plan:
+    - do:
+      - aggregate:
+        - { get: suse-ci, tags: *tags }
+        - { get: suse-cf, tags: *tags }
+        - { get: bosh-release, tags: *tags }
+        - { get: cpi-release, tags: *tags }
+        - get: stemcell
+          tags: *tags
+          trigger: true
+          resource: openstack-kvm-opensuse-leap
+          passed:
+            - build-openstack-kvm-opensuse-leap
+        - { get: bosh-cli, tags: *tags }
+        - { get: bats, tags: *tags }
+        - { get: bosh-deployment, tags: *tags }
+        - get: bosh-linux-stemcell-builder
+          tags: *tags
+          passed:
+            - build-openstack-kvm-opensuse-leap
+        - get: version
+          tags: *tags
+          passed:
+            - build-openstack-kvm-opensuse-leap
+
+        - {put: environment, tags: *tags, params: {acquire: true}}
+
+      - do:
+        - <<: *deploy-director
+          params:
+            <<: *director-params
+            BOSH_os_name: opensuse-leap
+
+        - <<: *prepare-bats-config
+          params:
+            STEMCELL_NAME: bosh-openstack-kvm-opensuse-leap-go_agent
+            BATS_floating_ip:               {{bats-floating-ip}}
+            BATS_default_security_groups:   {{openstack-default-security-groups}}
+            BATS_az:                        {{openstack-az}}
+            BATS_instance_type:             {{bats-instance-type}}
+            BATS_flavor_with_no_ephemeral_disk: {{bats-flavor-with-no-ephemeral-disk}}
+
+        - <<: *run-bats
+        ensure:
+          do:
+          - <<: *teardown
+      ensure:
+        do:
+        - {put: environment, tags: *tags, params: {release: environment}}
 
   #
   # vSphere
@@ -286,6 +405,13 @@ jobs:
 
 resources:
 
+  - name: suse-cf
+    type: git
+    source:
+      branch: master
+      uri: git@github.com:SUSE/cloudfoundry
+      private_key: {{github-private-key}}
+
   - name: suse-ci
     type: git
     source:
@@ -298,7 +424,54 @@ resources:
       uri: {{repo}}
       branch: {{branch}}
 
-  # TODO re-using existing repo for testing and because it's currently unused
+  - name: bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
+  - name: cpi-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry-incubator/bosh-openstack-cpi-release
+
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment
+      branch: master
+
+  - name: bosh-cli
+    type: s3
+    source:
+      regexp: bosh-cli-([0-9.]+)-linux-amd64
+      bucket: bosh-cli-artifacts
+      region_name: us-east-1
+
+  - name: bats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
+      branch: gocli-bats
+
+  - name: environment
+    type: pool
+    source:
+      pool: openstack
+      uri: git@github.com:SUSE/cat-pools
+      branch: master
+      private_key: {{github-private-key}}
+
+
+  - name: syslog-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/syslog-release
+
+  - name: os-conf-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/os-conf-release
+
   - name: stemcells-index
     type: git
     source:

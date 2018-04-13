@@ -23,8 +23,8 @@ release-stemcells:
 		-p bosh:release:stemcells \
 		-l shared_vars.yml \
 		-l release/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
 		-l ${TERRAFORM_DATA_DIR}/vars.yml \
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
 		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
 	fly -t ${TARGET} unpause-pipeline -p bosh:release:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:release:stemcells
@@ -58,8 +58,8 @@ develop-stemcells:
 		-p bosh:develop:stemcells \
 		-l shared_vars.yml \
 		-l develop/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})\
 		-l ${TERRAFORM_DATA_DIR}/vars.yml \
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
 		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
 	fly -t ${TARGET} unpause-pipeline -p bosh:develop:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:develop:stemcells
@@ -93,6 +93,8 @@ regression-stemcells:
 		-p bosh:regression:stemcells \
 		-l shared_vars.yml \
 		-l regression/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+		-l ${TERRAFORM_DATA_DIR}/vars.yml \
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
+		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
 	#fly -t ${TARGET} unpause-pipeline -p bosh:regression:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:regression:stemcells
