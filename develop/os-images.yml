@@ -54,6 +54,8 @@ jobs:
         trigger: true
       - get: bosh-linux-stemcell-builder
         trigger: true
+      - get: daily
+        trigger: true
       - task: build
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
         privileged: true
@@ -94,6 +96,11 @@ resource_types:
     tag: latest
 
 resources:
+  - name: daily
+    type: time
+    source:
+      interval: 25h
+
   - name: lftp.os-image-sle
     type: lftp-resource
     source:
