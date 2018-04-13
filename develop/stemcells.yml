@@ -72,6 +72,7 @@ jobs:
 
   - name: test-stemcells-suse
     serial: true
+    serial_groups: [tests-suse]
     plan:
       - do:
         - aggregate:
@@ -120,6 +121,7 @@ jobs:
 
   - name: test-stemcells-ubuntu
     serial: true
+    serial_groups: [tests-ubuntu]
     plan:
       - do:
         - aggregate:
@@ -630,6 +632,7 @@ jobs:
 
   - name: bats-suse
     serial: true
+    serial_groups: [tests-suse]
     plan:
     - do:
       - aggregate:
@@ -682,6 +685,7 @@ jobs:
 
   - name: bats-ubuntu
     serial: true
+    serial_groups: [tests-ubuntu]
     plan:
     - do:
       - aggregate:

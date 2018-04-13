@@ -235,6 +235,7 @@ jobs:
 
   - name: test-openstack-opensuse
     serial: true
+    serial_groups: [tests-suse]
     plan:
       - do:
         - aggregate:
@@ -283,6 +284,7 @@ jobs:
 
   - name: bats-openstack-opensuse
     serial: true
+    serial_groups: [tests-suse]
     plan:
     - do:
       - aggregate:
