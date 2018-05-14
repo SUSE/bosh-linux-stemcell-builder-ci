@@ -1,4 +1,8 @@
 ---
+
+shared:
+  - tags: &tags ['eng-provo']
+
 jobs:
   - name: build-ubuntu-trusty
     serial_groups: [ubuntu]
@@ -6,6 +10,7 @@ jobs:
       - get: bosh-linux-stemcell-builder
         trigger: true
       - task: build
+        tags: *tags
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
         privileged: true
         params:
@@ -22,6 +27,7 @@ jobs:
       - get: bosh-linux-stemcell-builder
         trigger: true
       - task: build
+        tags: *tags
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
         privileged: true
         params:
@@ -38,6 +44,7 @@ jobs:
       - get: bosh-linux-stemcell-builder
         trigger: true
       - task: build
+        tags: *tags
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
         privileged: true
         params:
@@ -57,6 +64,7 @@ jobs:
       - get: daily
         trigger: true
       - task: build
+        tags: *tags
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
         privileged: true
         params:
@@ -75,6 +83,7 @@ jobs:
       - get: sle-bosh-linux-stemcell-builder
         trigger: true
       - task: build
+        tags: *tags
         file: sle-bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
         input_mapping:
           bosh-linux-stemcell-builder: sle-bosh-linux-stemcell-builder
