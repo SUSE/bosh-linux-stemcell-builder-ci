@@ -1,0 +1,8 @@
+repo: https://github.com/SUSE/bosh-linux-stemcell-builder.git
+branch: sle_stemcell
+
+osimage-aws-directory: release/os-images
+
+stemcell-aws-directory: release-sle/stemcells
+stemcell-version-key: release-sle/stemcells/version
+stemcell-version-semver-bump: minor

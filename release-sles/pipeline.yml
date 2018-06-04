@@ -1,0 +1,371 @@
+shared:
+  - tags: &tags ['eng-provo']
+
+  - &deploy-director
+    task: deploy-director
+    tags: *tags
+    file: suse-ci/tasks/bats/deploy-director.yml
+    params: &director-params
+      BAT_INFRASTRUCTURE:             openstack
+      BOSH_dns_recursor_ip:           {{openstack-dns-recursor-ip}}
+      BOSH_auth_url:                  {{openstack-auth-url}}
+      BOSH_az:                        {{openstack-az}}
+      BOSH_default_security_groups:   {{openstack-default-security-groups}}
+      BOSH_openstack_password:        {{openstack-password}}
+      BOSH_openstack_username:        {{openstack-username}}
+      BOSH_openstack_domain:          {{openstack-domain}}
+      BOSH_openstack_project:         {{openstack-project}}
+      BOSH_region:                    {{openstack-region}}
+      BOSH_private_key_data:          {{openstack-private-key-data}}
+      BOSH_openstack_ca_cert_data:    {{openstack-ca-cert-data}}
+      BOSH_default_key_name:          bosh-concourse
+
+  - &prepare-bats-config
+    task: prepare-bats
+    tags: *tags
+    file: suse-ci/tasks/bats/prepare-bats-config.yml
+
+  - &run-bats
+    task: run-bats
+    tags: *tags
+    file: bats/ci/tasks/run-bats.yml
+
+  - &teardown
+    task: teardown
+    tags: *tags
+    file: suse-ci/tasks/destroy-director.yml
+
+jobs:
+  - name: test-unit
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - task: test-unit
+        file: bosh-linux-stemcell-builder/ci/tasks/test-unit.yml
+
+  - name: build-stemcell
+    serial: true
+    plan:
+      - get: bosh-linux-stemcell-builder
+        passed:
+          - test-unit
+      - get: sles-12-os-image
+        trigger: true
+      - get: version
+        params:
+          bump: {{stemcell-version-semver-bump}}
+      - put: version
+        params:
+          file: version/number
+
+  #
+  # AWS
+  #
+
+  - name: build-aws-xen-hvm-sles-12
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: sles-12-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: sles-12-os-image
+        privileged: true
+        params:
+          IAAS:         aws
+          HYPERVISOR:   xen-hvm
+          OS_NAME:      sles
+          OS_VERSION:   12
+      - aggregate:
+        - put: aws-xen-hvm-sles-12
+          params:
+            file: stemcell/*.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  #
+  # OpenStack
+  #
+
+  - name: build-openstack-kvm-sles-12
+    plan:
+      - aggregate:
+          - get: version
+            trigger: true
+            passed: [build-stemcell]
+          - get: suse-ci
+          - get: bosh-linux-stemcell-builder
+            passed: [build-stemcell]
+          - get: stemcells-index
+          - get: sles-12-os-image
+      - task: create-stemcell
+        file: suse-ci/tasks/build.yml
+        input_mapping:
+          os-image: sles-12-os-image
+        privileged: true
+        params:
+          IAAS:         openstack
+          HYPERVISOR:   kvm
+          OS_NAME:      sles
+          OS_VERSION:   12
+      - aggregate:
+        - put: openstack-kvm-sles-12-raw
+          params:
+            file: stemcell/*-raw.tgz
+        - put: openstack-kvm-sles-12
+          params:
+            file: stemcell/*-go_agent.tgz
+      - put: stemcells-index
+        params:
+          repository: stemcells-index
+          rebase: true
+
+  - name: test-openstack-sles-12
+    serial: true
+    serial_groups: [tests-suse]
+    plan:
+      - do:
+        - aggregate:
+          - get: version
+            trigger: true
+            passed:
+              - build-openstack-kvm-sles-12
+          - { get: suse-ci, tags: *tags }
+          - { get: suse-cf, tags: *tags }
+          - { get: bosh-linux-stemcell-builder, tags: *tags }
+          - { get: bosh-release, tags: *tags }
+          - { get: bosh-deployment, tags: *tags }
+          - { get: bosh-cli, tags: *tags }
+          - { get: syslog-release, tags: *tags }
+          - { get: os-conf-release, tags: *tags }
+          - get: openstack-kvm-sles-12
+            tags: *tags
+            passed: [build-openstack-kvm-sles-12]
+
+          - {put: environment, tags: *tags, params: {acquire: true}}
+
+        - do:
+          - task: deploy-director
+            tags: *tags
+            file: suse-ci/tasks/deploy-director.yml
+            input_mapping:
+              stemcell: openstack-kvm-sles-12
+            params:
+              <<: *director-params
+              BOSH_os_name: sles-12
+
+          - task: test-stemcell
+            tags: *tags
+            file: suse-ci/tasks/test-stemcell.yml
+            input_mapping:
+              stemcell: openstack-kvm-sles-12
+            params:
+              BOSH_os_name: sles-12
+              package: ipv4director
+          ensure:
+            do:
+            - <<: *teardown
+        ensure:
+          do:
+          - {put: environment, tags: *tags, params: {release: environment}}
+
+  - name: bats-openstack-sles-12
+    serial: true
+    serial_groups: [tests-suse]
+    plan:
+    - do:
+      - aggregate:
+        - { get: suse-ci, tags: *tags }
+        - { get: suse-cf, tags: *tags }
+        - { get: bosh-release, tags: *tags }
+        - { get: cpi-release, tags: *tags }
+        - get: stemcell
+          tags: *tags
+          trigger: true
+          resource: openstack-kvm-sles-12
+          passed:
+            - build-openstack-kvm-sles-12
+        - { get: bosh-cli, tags: *tags }
+        - { get: bats, tags: *tags }
+        - { get: bosh-deployment, tags: *tags }
+        - get: bosh-linux-stemcell-builder
+          tags: *tags
+          passed:
+            - build-openstack-kvm-sles-12
+        - get: version
+          tags: *tags
+          passed:
+            - build-openstack-kvm-sles-12
+
+        - {put: environment, tags: *tags, params: {acquire: true}}
+
+      - do:
+        - <<: *deploy-director
+          params:
+            <<: *director-params
+            BOSH_os_name: sles-12
+
+        - <<: *prepare-bats-config
+          params:
+            STEMCELL_NAME: bosh-openstack-kvm-sles-12-go_agent
+            BATS_floating_ip:               {{bats-floating-ip}}
+            BATS_default_security_groups:   {{openstack-default-security-groups}}
+            BATS_az:                        {{openstack-az}}
+            BATS_instance_type:             {{bats-instance-type}}
+            BATS_flavor_with_no_ephemeral_disk: {{bats-flavor-with-no-ephemeral-disk}}
+
+        - <<: *run-bats
+        ensure:
+          do:
+          - <<: *teardown
+      ensure:
+        do:
+        - {put: environment, tags: *tags, params: {release: environment}}
+
+resources:
+
+  - name: suse-cf
+    type: git
+    source:
+      branch: master
+      uri: git@github.com:SUSE/cloudfoundry
+      private_key: {{github-private-key}}
+
+  - name: suse-ci
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
+      private_key: {{github-private-key}}
+
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: {{repo}}
+      branch: {{branch}}
+
+  - name: bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
+  - name: cpi-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry-incubator/bosh-openstack-cpi-release
+
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment
+      branch: master
+
+  - name: bosh-cli
+    type: s3
+    source:
+      regexp: bosh-cli-([0-9.]+)-linux-amd64
+      bucket: bosh-cli-artifacts
+      region_name: us-east-1
+
+  - name: bats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
+
+  - name: environment
+    type: pool
+    source:
+      pool: openstack
+      uri: git@github.com:SUSE/cat-pools
+      branch: master
+      private_key: {{github-private-key}}
+
+
+  - name: syslog-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/syslog-release
+
+  - name: os-conf-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/os-conf-release
+
+  - name: stemcells-index
+    type: git
+    source:
+      uri: git@github.com:SUSE/cat-pools
+      branch: stemcells-release-index
+      private_key: {{github-private-key}}
+
+  - name: version
+    type: semver
+    source:
+      driver: s3
+      key: {{stemcell-version-key}}
+      bucket: {{stemcell-aws-bucket}}
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+      initial_version: 166.0.0
+
+  #
+  # Stemcells
+  #
+
+  #
+  # AWS
+  #
+
+  - name: aws-xen-hvm-sles-12
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/aws/bosh-stemcell-(.+)-aws-xen-hvm-sles-12-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # Openstack
+  #
+
+  - name: openstack-kvm-sles-12
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  - name: openstack-kvm-sles-12-raw
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent-raw.tgz
+      access_key_id: {{stemcell-aws-access-key}}
+      secret_access_key: {{stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  #
+  # OS-Image
+  #
+
+  - name: sles-12-os-image
+    type: s3
+    source:
+      bucket: {{osimage-aws-bucket}}
+      versioned_file: ((osimage-aws-directory))/bosh-sles-12-os-image.tgz
+      access_key_id: {{osimage-aws-access-key}}
+      secret_access_key: {{osimage-aws-secret-key}}
+      region_name: {{osimage-aws-region}}
