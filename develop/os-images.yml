@@ -131,8 +131,8 @@ resources:
   - name: sle-bosh-linux-stemcell-builder
     type: git
     source:
-      uri: ((sle_repo))
-      branch: ((sle_branch))
+      uri: ((sle-repo))
+      branch: ((sle-branch))
 
   #
   # ubuntu-trusty

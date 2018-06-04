@@ -1,8 +1,8 @@
 repo: https://github.com/SUSE/bosh-linux-stemcell-builder.git
 branch: opensuse_stemcell
 
-sle_repo: https://github.com/SUSE/bosh-linux-stemcell-builder.git
-sle_branch: sle_stemcell
+sle-repo: https://github.com/SUSE/bosh-linux-stemcell-builder.git
+sle-branch: sle_stemcell
 
 osimage-aws-directory: release/os-images
 
