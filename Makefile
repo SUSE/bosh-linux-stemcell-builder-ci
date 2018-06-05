@@ -13,7 +13,7 @@ release-os-images:
 		-p bosh:release:os-images \
 		-l shared_vars.yml \
 		-l release/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null)"
 	fly -t ${TARGET} unpause-pipeline -p bosh:release:os-images
 	fly -t ${TARGET} expose-pipeline -p bosh:release:os-images
 
@@ -24,8 +24,8 @@ release-stemcells:
 		-l shared_vars.yml \
 		-l release/vars.yml \
 		-l ${TERRAFORM_DATA_DIR}/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
-		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null) \
+		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg 2> /dev/null`\""
 	fly -t ${TARGET} unpause-pipeline -p bosh:release:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:release:stemcells
 
@@ -36,7 +36,7 @@ release-fissile:
 		-l shared_vars.yml \
 		-l release/vars.yml \
 		-l fissile/release_vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null)"
 	fly -t ${TARGET} unpause-pipeline -p fissile:release
 	fly -t ${TARGET} expose-pipeline -p fissile:release
 
@@ -48,7 +48,7 @@ develop-os-images:
 		-p bosh:develop:os-images \
 		-l shared_vars.yml \
 		-l develop/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null)"
 	fly -t ${TARGET} unpause-pipeline -p bosh:develop:os-images
 	fly -t ${TARGET} expose-pipeline -p bosh:develop:os-images
 
@@ -59,8 +59,8 @@ develop-stemcells:
 		-l shared_vars.yml \
 		-l develop/vars.yml \
 		-l ${TERRAFORM_DATA_DIR}/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
-		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null) \
+		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg 2> /dev/null`\""
 	fly -t ${TARGET} unpause-pipeline -p bosh:develop:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:develop:stemcells
 
@@ -71,7 +71,7 @@ develop-fissile:
 		-l shared_vars.yml \
 		-l develop/vars.yml \
 		-l fissile/develop_vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null)"
 	fly -t ${TARGET} unpause-pipeline -p fissile:develop
 	fly -t ${TARGET} expose-pipeline -p fissile:develop
 
@@ -83,7 +83,7 @@ regression-os-images:
 		-p bosh:regression:os-images \
 		-l shared_vars.yml \
 		-l regression/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE})"
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null)"
 	#fly -t ${TARGET} unpause-pipeline -p bosh:regression:os-images
 	fly -t ${TARGET} expose-pipeline -p bosh:regression:os-images
 
@@ -94,8 +94,8 @@ regression-stemcells:
 		-l shared_vars.yml \
 		-l regression/vars.yml \
 		-l ${TERRAFORM_DATA_DIR}/vars.yml \
-		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE}) \
-		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
+		-l <(gpg --decrypt --batch --no-tty ${CONCOURSE_SECRETS_FILE} 2> /dev/null) \
+		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg 2> /dev/null`\""
 	#fly -t ${TARGET} unpause-pipeline -p bosh:regression:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:regression:stemcells
 

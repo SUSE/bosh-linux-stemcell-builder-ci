@@ -10,5 +10,5 @@ fly -t $TARGET set-pipeline \
   -p bosh:release-sles:os-images \
   -l ../shared_vars.yml \
   -l vars.yml \
-  -l <(gpg --decrypt --batch --no-tty "$CONCOURSE_SECRETS_FILE") \
+  -l <(gpg --decrypt --batch --no-tty "$CONCOURSE_SECRETS_FILE" 2> /dev/null) \
   $*

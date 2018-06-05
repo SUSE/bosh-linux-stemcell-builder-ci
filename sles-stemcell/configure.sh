@@ -11,7 +11,7 @@ fly -t $TARGET set-pipeline \
   -p bosh:release-sles:stemcells \
   -l ../shared_vars.yml \
   -l vars.yml \
-  -l <(gpg --decrypt --batch --no-tty "$CONCOURSE_SECRETS_FILE") \
+  -l <(gpg --decrypt --batch --no-tty "$CONCOURSE_SECRETS_FILE" 2> /dev/null) \
   -l $TERRAFORM_DATA_DIR/vars.yml \
-  -v openstack-private-key-data="`gpg --decrypt --batch --no-tty $TERRAFORM_DATA_DIR/bosh.pem.gpg`" \
+  -v openstack-private-key-data="`gpg --decrypt --batch --no-tty $TERRAFORM_DATA_DIR/bosh.pem.gpg 2> /dev/null`" \
   $*
