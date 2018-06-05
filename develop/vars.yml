@@ -9,3 +9,5 @@ stemcell-aws-directory: develop/stemcells
 
 stemcell-version-key: develop/stemcells/version
 stemcell-version-semver-bump: patch
+
+sles-osimage-aws-directory: develop/os-images

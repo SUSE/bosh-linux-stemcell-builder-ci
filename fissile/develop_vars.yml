@@ -7,3 +7,5 @@ fissile-tag-prefix-sle: "develop-"
 fissile-tag-prefix-opensuse: "develop-"
 
 tag-as-latest: false
+
+sles-osimage-aws-directory: develop/os-images
