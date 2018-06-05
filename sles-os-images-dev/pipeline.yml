@@ -1,0 +1,66 @@
+---
+
+shared:
+  - tags: &tags ['eng-provo']
+
+jobs:
+  - name: build-sle-12
+    plan:
+      - get: lftp.os-image-sle
+        trigger: true
+      - get: bosh-linux-stemcell-builder
+        trigger: true
+      - get: daily
+        trigger: true
+      - task: build
+        tags: *tags
+        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
+        input_mapping:
+          bosh-linux-stemcell-builder: bosh-linux-stemcell-builder
+        privileged: true
+        params:
+          OPERATING_SYSTEM_NAME:      sles
+          OPERATING_SYSTEM_VERSION:   12
+          TARGET_USER:                user
+      - put: sle-12-os-image
+        params:
+          file: os-image/sles-12.tgz
+          acl: public-read
+
+resource_types:
+- name: lftp-resource
+  type: docker-image
+  source:
+    repository: machinerytool/concourse-lftp-resource
+    tag: latest
+
+resources:
+  - name: daily
+    type: time
+    source:
+      interval: 25h
+
+  - name: lftp.os-image-sle
+    type: lftp-resource
+    source:
+      url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/SLE/images/
+      regexp: SLES12-SP3.x86_64-2.12.3-Build(.*).tbz
+
+  - name: bosh-linux-stemcell-builder
+    type: git
+    source:
+      uri: {{repo}}
+      branch: {{branch}}
+
+  #
+  # SLES
+  #
+
+  - name: sle-12-os-image
+    type: s3
+    source:
+      bucket: {{sles-osimage-aws-bucket}}
+      versioned_file: ((sles-osimage-aws-directory))/bosh-sles-12-os-image.tgz
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
+      region_name: {{sles-osimage-aws-region}}
