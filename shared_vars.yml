@@ -2,3 +2,6 @@ osimage-aws-bucket: suse-bosh-stemcells-us-west-1
 osimage-aws-region: us-west-1
 stemcell-aws-bucket: suse-bosh-stemcells-us-west-1
 stemcell-aws-region: us-west-1
+sles-osimage-aws-bucket: suse-bosh-sles-stemcells
+sles-osimage-aws-region: eu-central-1
+sles-osimage-aws-directory: os-images

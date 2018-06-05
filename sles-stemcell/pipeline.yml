@@ -313,8 +313,8 @@ resources:
       driver: s3
       key: {{stemcell-version-key}}
       bucket: {{stemcell-aws-bucket}}
-      access_key_id: {{stemcell-aws-access-key}}
-      secret_access_key: {{stemcell-aws-secret-key}}
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
       region_name: {{stemcell-aws-region}}
       initial_version: 166.0.0
 
@@ -331,8 +331,8 @@ resources:
     source:
       bucket: {{stemcell-aws-bucket}}
       regexp: ((stemcell-aws-directory))/aws/bosh-stemcell-(.+)-aws-xen-hvm-sles-12-go_agent.tgz
-      access_key_id: {{stemcell-aws-access-key}}
-      secret_access_key: {{stemcell-aws-secret-key}}
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
       region_name: {{stemcell-aws-region}}
 
   #
@@ -344,8 +344,8 @@ resources:
     source:
       bucket: {{stemcell-aws-bucket}}
       regexp: ((stemcell-aws-directory))/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent.tgz
-      access_key_id: {{stemcell-aws-access-key}}
-      secret_access_key: {{stemcell-aws-secret-key}}
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
       region_name: {{stemcell-aws-region}}
 
   - name: openstack-kvm-sles-12-raw
@@ -353,8 +353,8 @@ resources:
     source:
       bucket: {{stemcell-aws-bucket}}
       regexp: ((stemcell-aws-directory))/openstack/bosh-stemcell-(.+)-openstack-kvm-sles-12-go_agent-raw.tgz
-      access_key_id: {{stemcell-aws-access-key}}
-      secret_access_key: {{stemcell-aws-secret-key}}
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
       region_name: {{stemcell-aws-region}}
 
   #
@@ -364,8 +364,8 @@ resources:
   - name: sles-12-os-image
     type: s3
     source:
-      bucket: {{osimage-aws-bucket}}
-      versioned_file: ((osimage-aws-directory))/bosh-sles-12-os-image.tgz
-      access_key_id: {{osimage-aws-access-key}}
-      secret_access_key: {{osimage-aws-secret-key}}
-      region_name: {{osimage-aws-region}}
+      bucket: {{sles-osimage-aws-bucket}}
+      versioned_file: ((sles-osimage-aws-directory))/bosh-sles-12-os-image.tgz
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
+      region_name: {{sles-osimage-aws-region}}
