@@ -98,3 +98,11 @@ regression-stemcells:
 		-v openstack-private-key-data=\"`gpg --decrypt --batch --no-tty ${TERRAFORM_DATA_DIR}/bosh.pem.gpg`\""
 	#fly -t ${TARGET} unpause-pipeline -p bosh:regression:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:regression:stemcells
+
+release-sles: release-sles-os-images release-sles-stemcell
+
+release-sles-os-images:
+	cd sles-os-images && ./configure.sh
+
+release-sles-stemcell:
+	cd sles-stemcell && ./configure.sh
