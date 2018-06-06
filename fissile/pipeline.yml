@@ -42,7 +42,7 @@ jobs:
         params:
           tag_prefix: ((os-image-tag-prefix-sle))
           tag: semver.os-image-sle12/number
-          import_file: s3.sle-os-image/bosh-sle-12-os-image.tgz
+          import_file: s3.sle-os-image/bosh-sles-12-os-image.tgz
           tag_as_latest: ((tag-as-latest))
 
   - name: build-fissile-stemcell-ubuntu-trusty
