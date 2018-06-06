@@ -23,4 +23,4 @@ outputs:
 - name: director-state
 
 run:
-  path: suse-ci/sles-bats/tasks/deploy-director.sh
+  path: suse-ci/sles-aws/tasks/deploy-director.sh

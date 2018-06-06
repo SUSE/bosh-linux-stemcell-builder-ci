@@ -1,6 +1,6 @@
 ---
 jobs:
-  - name: sles-bats
+  - name: sles-aws
     max_in_flight: 3
     plan:
     - get: daily
@@ -19,7 +19,7 @@ jobs:
           acquire: true
       - do:
         - task: deploy-director
-          file: suse-ci/sles-bats/tasks/deploy-director.yml
+          file: suse-ci/sles-aws/tasks/deploy-director.yml
           params:
             BAT_INFRASTRUCTURE: aws
             AWS_ACCESS_KEY_ID:     {{sles-stemcell-aws-access-key}}
@@ -49,7 +49,7 @@ jobs:
       - get: suse-ci
       - put: terraform
         params:
-          terraform_source: suse-ci/sles-bats/terraform
+          terraform_source: suse-ci/sles-aws/terraform
           delete_on_failure: true
           generate_random_name: true
       - put: environment
@@ -71,7 +71,7 @@ jobs:
           AWS_DEFAULT_REGION:    {{aws-region}}
       - put: terraform
         params:
-          terraform_source: suse-ci/sles-bats/terraform
+          terraform_source: suse-ci/sles-aws/terraform
           env_name_file: environment/name
           action: destroy
         get_params:
@@ -108,6 +108,7 @@ resources:
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
       private_key: {{github-private-key}}
+      branch: master
 
   - name: environment
     type: pool
