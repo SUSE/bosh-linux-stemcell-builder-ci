@@ -175,7 +175,7 @@ output "DeploymentEIP" {
 }
 
 output "DirectorStaticIP" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 6)}"
+  value = "${cidrhost(aws_vpc.default.cidr_block, 10)}"
 }
 
 output "AvailabilityZone" {

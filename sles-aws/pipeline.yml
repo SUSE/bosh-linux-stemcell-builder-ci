@@ -26,18 +26,30 @@ jobs:
             AWS_SECRET_ACCESS_KEY: {{sles-stemcell-aws-secret-key}}
             AWS_DEFAULT_REGION:    {{aws-region}}
             AWS_SSH_PRIVATE_KEY:   {{aws-ssh-private-key}}
-            DEPLOY_ARGS: |
-              -o bosh-deployment/external-ip-with-registry-not-recommended.yml
+
+            BOSH_ENVIRONMENT: {{outer-bosh-environment}}
+            BOSH_CLIENT: {{outer-bosh-client}}
+            BOSH_CLIENT_SECRET: {{outer-bosh-client-secret}}
+            BOSH_CA_CERT: {{outer-bosh-ca-cert}}
+
         - task: prepare-bats-config
-          file: bosh-src/ci/bats/iaas/aws/prepare-bats-config.yml
+          file: suse-ci/sles-aws/tasks/prepare-bats-config.yml
           params:
             STEMCELL_NAME: bosh-aws-xen-hvm-sles-12-go_agent
         - task: run-bats
           file: bats/ci/tasks/run-bats.yml
         ensure:
           do:
-          - task: teardown
-            file: bosh-src/ci/bats/tasks/destroy-director.yml
+          - try:
+              task: teardown
+              file: suse-ci/sles-aws/tasks/destroy-director.yml
+          - task: delete-deployment
+            file: suse-ci/sles-aws/tasks/delete-deployment.yml
+            params:
+              BOSH_ENVIRONMENT: {{outer-bosh-environment}}
+              BOSH_CLIENT: {{outer-bosh-client}}
+              BOSH_CLIENT_SECRET: ((outer-bosh-client-secret))
+              BOSH_CA_CERT: ((outer-bosh-ca-cert))
       ensure:
         do:
         - put: environment

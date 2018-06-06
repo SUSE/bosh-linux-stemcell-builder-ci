@@ -1,0 +1,12 @@
+networks:
+- name: ((env_name))
+  type: manual
+  subnets:
+  - az: z1
+    range: ((internal_cidr))
+    gateway: ((internal_gw))
+    reserved:	((reserved_range))
+    static:	((static_range))
+    cloud_properties:
+      subnet: ((subnet_id))
+      security_groups: ((default_security_groups))

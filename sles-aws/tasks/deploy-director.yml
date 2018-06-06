@@ -18,6 +18,10 @@ inputs:
 params:
   DEPLOY_ARGS: ""
   BAT_INFRASTRUCTURE: ""
+  BOSH_ENVIRONMENT: ""
+  BOSH_CLIENT: ""
+  BOSH_CLIENT_SECRET: ""
+  BOSH_CA_CERT: ""
 
 outputs:
 - name: director-state

@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: boshcpi/cpi-certification}
+
+inputs:
+  - name: suse-ci
+  - name: bosh-cli
+  - name: environment
+
+params:
+  BOSH_ENVIRONMENT: ""
+  BOSH_CLIENT: ""
+  BOSH_CLIENT_SECRET: ""
+  BOSH_CA_CERT: ""
+
+run:
+  path: suse-ci/sles-aws/tasks/delete-deployment.sh
