@@ -1,0 +1,7 @@
+---
+aws-region: eu-central-1
+aws-zone: eu-central-1a
+sles-stemcell-terraform-bucket: suse-sles-bats-terraform
+stemcell-aws-bucket: suse-bosh-sles-stemcells
+stemcell-aws-region: eu-central-1
+stemcell-aws-directory: stemcells

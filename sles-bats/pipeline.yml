@@ -1,0 +1,162 @@
+---
+jobs:
+  - name: sles-bats
+    max_in_flight: 3
+    plan:
+    - get: daily
+      trigger: true
+    - do:
+      - aggregate:
+        - {get: stemcell,         trigger: true, resource: aws-xen-hvm-sles-12}
+        - {get: bosh-release,     trigger: false, resource: bosh-release}
+        - {get: bats,             trigger: false}
+        - {get: bosh-cli,         trigger: false}
+        - {get: suse-ci,          trigger: false}
+        - {get: bosh-src,         trigger: false}
+        - {get: bosh-deployment,  trigger: false}
+      - put: environment
+        params:
+          acquire: true
+      - do:
+        - task: deploy-director
+          file: suse-ci/sles-bats/tasks/deploy-director.yml
+          params:
+            BAT_INFRASTRUCTURE: aws
+            AWS_ACCESS_KEY_ID:     {{sles-stemcell-aws-access-key}}
+            AWS_SECRET_ACCESS_KEY: {{sles-stemcell-aws-secret-key}}
+            AWS_DEFAULT_REGION:    {{aws-region}}
+            AWS_SSH_PRIVATE_KEY:   {{aws-ssh-private-key}}
+            DEPLOY_ARGS: |
+              -o bosh-deployment/external-ip-with-registry-not-recommended.yml
+        - task: prepare-bats-config
+          file: bosh-src/ci/bats/iaas/aws/prepare-bats-config.yml
+          params:
+            STEMCELL_NAME: bosh-aws-xen-hvm-sles-12-go_agent
+        - task: run-bats
+          file: bats/ci/tasks/run-bats.yml
+        ensure:
+          do:
+          - task: teardown
+            file: bosh-src/ci/bats/tasks/destroy-director.yml
+      ensure:
+        do:
+        - put: environment
+          params:
+            release: environment
+
+  - name: create-environment
+    plan:
+      - get: suse-ci
+      - put: terraform
+        params:
+          terraform_source: suse-ci/sles-bats/terraform
+          delete_on_failure: true
+          generate_random_name: true
+      - put: environment
+        params:
+          add: terraform
+
+  - name: destroy-environment
+    plan:
+      - get: bosh-src
+      - get: suse-ci
+      - put: environment
+        params:
+          acquire: true
+      - task: ensure-terminated
+        file: bosh-src/ci/bats/iaas/aws/ensure-terminated.yml
+        params:
+          AWS_ACCESS_KEY_ID:     {{sles-stemcell-aws-access-key}}
+          AWS_SECRET_ACCESS_KEY: {{sles-stemcell-aws-secret-key}}
+          AWS_DEFAULT_REGION:    {{aws-region}}
+      - put: terraform
+        params:
+          terraform_source: suse-ci/sles-bats/terraform
+          env_name_file: environment/name
+          action: destroy
+        get_params:
+          action: destroy
+      - put: environment
+        params:
+          remove: environment
+
+resource_types:
+  - name: terraform_type
+    type: docker-image
+    source:
+      repository: ljfranklin/terraform-resource
+
+resources:
+  - name: daily
+    type: time
+    source:
+      interval: 25h
+
+  - name: bosh-release
+    type: bosh-io-release
+    source:
+      repository: cloudfoundry/bosh
+
+  - name: bosh-src
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh.git
+      branch: master
+
+  - name: suse-ci
+    type: git
+    source:
+      uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
+      private_key: {{github-private-key}}
+
+  - name: environment
+    type: pool
+    source:
+      pool: aws
+      uri: git@github.com:SUSE/cat-pools
+      branch: master
+      private_key: {{github-private-key}}
+
+  - name: terraform
+    type: terraform_type
+    source:
+      storage:
+        access_key_id:     {{sles-stemcell-aws-access-key}}
+        secret_access_key: {{sles-stemcell-aws-secret-key}}
+        bucket:            {{sles-stemcell-terraform-bucket}}
+        bucket_path:       terraform-state
+        region_name:       {{aws-region}}
+      vars:
+        access_key: {{sles-stemcell-aws-access-key}}
+        secret_key: {{sles-stemcell-aws-secret-key}}
+        region:     {{aws-region}}
+        zone:       {{aws-zone}}
+        ssh_public_key: {{aws-ssh-public-key}}
+
+  - name: bosh-cli
+    type: s3
+    source:
+      regexp: bosh-cli-([0-9.]+)-linux-amd64
+      bucket: bosh-cli-artifacts
+      region_name: us-east-1
+
+  - name: aws-xen-hvm-sles-12
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/aws/bosh-stemcell-(.+)-aws-xen-hvm-sles-12-go_agent.tgz
+      access_key_id: {{sles-stemcell-aws-access-key}}
+      secret_access_key: {{sles-stemcell-aws-secret-key}}
+      region_name: {{stemcell-aws-region}}
+
+  - name: bats
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-acceptance-tests.git
+      branch: master
+
+  - name: bosh-deployment
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-deployment.git
+      branch: master
