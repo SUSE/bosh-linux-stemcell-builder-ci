@@ -1,18 +1,11 @@
 ---
 jobs:
-  - name: start-job
-    serial: true
-    plan:
-      - get: bosh-linux-stemcell-builder
-
   - name: build-sle-12
     plan:
       - get: lftp.os-image-sle
         trigger: true
       - get: bosh-linux-stemcell-builder
         trigger: true
-        passed:
-          - start-job
       - task: build
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
         input_mapping:
