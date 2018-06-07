@@ -29,8 +29,8 @@ jobs:
 
             BOSH_ENVIRONMENT: {{outer-bosh-environment}}
             BOSH_CLIENT: {{outer-bosh-client}}
-            BOSH_CLIENT_SECRET: {{outer-bosh-client-secret}}
-            BOSH_CA_CERT: {{outer-bosh-ca-cert}}
+            BOSH_CLIENT_SECRET: ((outer-bosh-client-secret))
+            BOSH_CA_CERT: ((outer-bosh-ca-cert))
 
         - task: prepare-bats-config
           file: suse-ci/sles-aws/tasks/prepare-bats-config.yml
