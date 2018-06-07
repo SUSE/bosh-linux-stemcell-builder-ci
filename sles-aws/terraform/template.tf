@@ -10,6 +10,23 @@ variable "zone" {}
 
 variable "env_name" {}
 
+variable "concourse_vpc_id" {
+  type = "string"
+}
+
+variable "concourse_route_table_id" {
+  type = "string"
+}
+
+variable "concourse_security_group_id" {
+  type = "string"
+}
+
+resource "random_integer" "network_number" {
+  min     = 100
+  max     = 200
+}
+
 provider "aws" {
   access_key = "${var.access_key}"
   secret_key = "${var.secret_key}"
@@ -18,10 +35,43 @@ provider "aws" {
 
 # Create a VPC to launch our instances into
 resource "aws_vpc" "default" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "10.${random_integer.network_number.result}.0.0/16"
   tags {
     Name = "${var.env_name}"
   }
+}
+
+# Connect new VPC to Concourse
+resource "aws_vpc_peering_connection" "bats-concourse-peering" {
+  peer_vpc_id = "${aws_vpc.default.id}"
+  vpc_id      = "${var.concourse_vpc_id}"
+
+  auto_accept = true
+
+  tags = {
+    Name    = "BATS VPC to Concourse worker VPC"
+    Comment = "Managed By Terraform"
+  }
+}
+
+resource "aws_route" "bosh_route_default" {
+  destination_cidr_block    = "0.0.0.0/0"
+  nat_gateway_id            = "${aws_nat_gateway.default.id}"
+  route_table_id            = "${aws_route_table.default.id}"
+}
+
+# Connection to the VPC
+resource "aws_route" "bosh_route_to_vpc" {
+  destination_cidr_block    = "10.0.0.0/16"
+  vpc_peering_connection_id = "${aws_vpc_peering_connection.bats-concourse-peering.id}"
+  route_table_id            = "${aws_route_table.default.id}"
+}
+
+# Add route to self in other VPCs table
+resource "aws_route" "concourse_route_back_to_vpc" {
+  destination_cidr_block    = "${aws_subnet.default.cidr_block}"
+  vpc_peering_connection_id = "${aws_vpc_peering_connection.bats-concourse-peering.id}"
+  route_table_id            = "${var.concourse_route_table_id}"
 }
 
 # Create an internet gateway to give our subnet access to the outside world
@@ -32,7 +82,29 @@ resource "aws_internet_gateway" "default" {
   }
 }
 
+resource "aws_nat_gateway" "default" {
+  allocation_id = "${aws_eip.nat.id}"
+  subnet_id     = "${aws_subnet.public.id}"
+  depends_on    = ["aws_internet_gateway.default"]
+
+  tags {
+    Name = "NAT"
+  }
+}
+
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
 resource "aws_route_table" "default" {
+  vpc_id = "${aws_vpc.default.id}"
+
+  tags {
+    Name = "${var.env_name}"
+  }
+}
+
+resource "aws_route_table" "public" {
   vpc_id = "${aws_vpc.default.id}"
   route {
     cidr_block = "0.0.0.0/0"
@@ -49,14 +121,29 @@ resource "aws_route_table_association" "a" {
   route_table_id = "${aws_route_table.default.id}"
 }
 
+resource "aws_route_table_association" "b" {
+  subnet_id = "${aws_subnet.public.id}"
+  route_table_id = "${aws_route_table.public.id}"
+}
+
 resource "aws_subnet" "default" {
   vpc_id = "${aws_vpc.default.id}"
-  cidr_block = "${aws_vpc.default.cidr_block}"
+  cidr_block = "${cidrsubnet(aws_vpc.default.cidr_block, 8, 1)}"
   depends_on = ["aws_internet_gateway.default"]
   availability_zone = "${var.zone}"
 
   tags {
     Name = "${var.env_name}"
+  }
+}
+
+resource "aws_subnet" "public" {
+  vpc_id            = "${aws_vpc.default.id}"
+  cidr_block        = "${cidrsubnet(aws_vpc.default.cidr_block, 8, 0)}"
+  availability_zone = "${var.zone}"
+
+  tags {
+    Name = "${var.env_name}-public-subnet"
   }
 }
 
@@ -108,6 +195,16 @@ resource "aws_security_group" "allow_all" {
   tags {
     Name = "${var.env_name}"
   }
+}
+
+# Add our group to outer BOSH directors
+resource "aws_security_group_rule" "bosh_security_group_rule_tcp" {
+  security_group_id        = "${var.concourse_security_group_id}"
+  type                     = "ingress"
+  protocol                 = "tcp"
+  from_port                = 0
+  to_port                  = 65535
+  source_security_group_id = "${aws_security_group.allow_all.id}"
 }
 
 resource "aws_eip" "director" {
@@ -175,7 +272,7 @@ output "DeploymentEIP" {
 }
 
 output "DirectorStaticIP" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 10)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 10)}"
 }
 
 output "AvailabilityZone" {
@@ -187,31 +284,31 @@ output "PublicSubnetID" {
 }
 
 output "PublicCIDR" {
-  value = "${aws_vpc.default.cidr_block}"
+  value = "${aws_subnet.default.cidr_block}"
 }
 
 output "PublicGateway" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 1)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 1)}"
 }
 
 output "DNS" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 2)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 2)}"
 }
 
 output "ReservedRange" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 2)}-${cidrhost(aws_vpc.default.cidr_block, 9)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 2)}-${cidrhost(aws_subnet.default.cidr_block, 9)}"
 }
 
 output "StaticRange" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 10)}-${cidrhost(aws_vpc.default.cidr_block, 30)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 10)}-${cidrhost(aws_subnet.default.cidr_block, 30)}"
 }
 
 output "StaticIP1" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 29)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 29)}"
 }
 
 output "StaticIP2" {
-  value = "${cidrhost(aws_vpc.default.cidr_block, 30)}"
+  value = "${cidrhost(aws_subnet.default.cidr_block, 30)}"
 }
 
 output "ELB" {
