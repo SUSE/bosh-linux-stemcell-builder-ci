@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-set -eu
+set -e
 
 cp bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
 chmod +x /usr/local/bin/bosh-cli
 
 state_path() { bosh-cli int director-state/director.yml --path="$1" ; }
 
-name=$(cat environment/name)
+if [ -z "$BOSH_DIRECTOR_NAME" ]; then
+  name=$(cat environment/name)
+else
+  name="$BOSH_DIRECTOR_NAME"
+fi
 
 function get_bosh_environment {
   if [[ -z $(state_path /instance_groups/name=bosh/networks/name=$name/static_ips/0 2>/dev/null) ]]; then
