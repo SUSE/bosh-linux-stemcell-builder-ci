@@ -8,10 +8,13 @@ jobs:
     plan:
       - get: lftp.os-image-sle
         trigger: true
+        tags: *tags
       - get: bosh-linux-stemcell-builder
         trigger: true
+        tags: *tags
       - get: daily
         trigger: true
+        tags: *tags
       - task: build
         tags: *tags
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
