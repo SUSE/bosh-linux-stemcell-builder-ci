@@ -64,7 +64,7 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -v director_name=bats-director \
   -v deployment_name=$(cat environment/name) \
   -v stemcell_os=$BOSH_os_name \
-  -v stemcell_version=$(cat stemcell/version) \
+  -v stemcell_version="\"$(cat stemcell/version)\"" \
   -v static_ip=$BOSH_internal_ip \
   -v local_bosh_release=$(realpath bosh-release/*.tgz) \
   --var-file=private_key=<(echo "$BOSH_private_key_data") \

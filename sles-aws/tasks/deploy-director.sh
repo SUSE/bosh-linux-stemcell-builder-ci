@@ -50,7 +50,7 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   -v local_bosh_release=$(realpath bosh-release/*.tgz) \
   -v local_bpm_release=$(realpath bpm-release/*.tgz) \
   -v stemcell_os=sles-12 \
-  -v stemcell_version=$(cat stemcell/version) \
+  -v stemcell_version="\"$(cat stemcell/version)\"" \
   --vars-file <( suse-ci/sles-aws/director-vars ) \
   $DEPLOY_ARGS \
   > director.yml
