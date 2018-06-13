@@ -113,6 +113,31 @@ jobs:
           params:
             release: environment
 
+  - name: light-stemcell
+    max_in_flight: 1
+    plan:
+    - do:
+      - aggregate:
+        - get: input-stemcell
+          trigger: true
+          resource: aws-xen-hvm-sles-12
+          passed: [bats] # acceptance
+        - {get: suse-ci,          trigger: false}
+        - {get: bosh-aws-light-stemcell-builder,  trigger: false}
+
+      - task: create-light-stemcell
+        file: suse-ci/sles-aws/tasks/create-light-stemcell.yml
+        params:
+          <<: *aws-credentials
+          ami_bucket_name: "suse-light-stemcells"
+          ami_region: "eu-central-1"
+          ami_destinations: '["eu-west-1"]'
+
+
+      - put: light-aws-xen-hvm-sles-12
+        params:
+          file: light-stemcell/*.tgz
+
   - name: create-environment
     plan:
       - get: suse-ci
@@ -188,6 +213,12 @@ resources:
       uri: https://github.com/SUSE/bosh-linux-stemcell-builder.git
       branch: sle_stemcell
 
+  - name: bosh-aws-light-stemcell-builder
+    type: git
+    source:
+      uri: https://github.com/cloudfoundry/bosh-aws-light-stemcell-builder
+      branch: master
+
   - name: environment
     type: pool
     source:
@@ -227,6 +258,15 @@ resources:
     source:
       bucket: {{stemcell-aws-bucket}}
       regexp: ((stemcell-aws-directory))/aws/bosh-stemcell-(.+)-aws-xen-hvm-sles-12-go_agent.tgz
+      access_key_id: ((sles-stemcell-aws-access-key))
+      secret_access_key: ((sles-stemcell-aws-secret-key))
+      region_name: {{stemcell-aws-region}}
+
+  - name: light-aws-xen-hvm-sles-12
+    type: s3
+    source:
+      bucket: {{stemcell-aws-bucket}}
+      regexp: ((stemcell-aws-directory))/aws/light-bosh-stemcell-(.+)-aws-xen-hvm-sles-12-go_agent.tgz
       access_key_id: ((sles-stemcell-aws-access-key))
       secret_access_key: ((sles-stemcell-aws-secret-key))
       region_name: {{stemcell-aws-region}}

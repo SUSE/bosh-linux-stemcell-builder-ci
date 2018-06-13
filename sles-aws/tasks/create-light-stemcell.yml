@@ -1,0 +1,22 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: boshcpi/light-stemcell-builder}
+
+inputs:
+  - name: suse-ci
+  - name: input-stemcell
+  - name: bosh-aws-light-stemcell-builder
+
+outputs:
+  - name: light-stemcell
+
+params:
+  ami_bucket_name:    ""
+  ami_region:         ""
+  ami_destinations:   ""
+
+run:
+  path: suse-ci/sles-aws/tasks/create-light-stemcell.sh
