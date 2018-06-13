@@ -179,7 +179,7 @@ resources:
     type: git
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
-      private_key: {{github-private-key}}
+      private_key: ((github-private-key))
       branch: master
 
   - name: bosh-linux-stemcell-builder
@@ -194,7 +194,7 @@ resources:
       pool: aws
       uri: git@github.com:SUSE/cat-pools
       branch: master
-      private_key: {{github-private-key}}
+      private_key: ((github-private-key))
 
   - name: terraform
     type: terraform_type
