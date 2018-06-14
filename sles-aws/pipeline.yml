@@ -98,6 +98,8 @@ jobs:
           - try:
               task: destroy-director
               file: suse-ci/sles-aws/tasks/destroy-director.yml
+              params:
+                BOSH_DIRECTOR_NAME:    stemcell-acceptance-tests
           - task: delete-deployment
             file: suse-ci/sles-aws/tasks/delete-deployment.yml
             params:
