@@ -117,7 +117,7 @@ jobs:
         - get: input-stemcell
           trigger: true
           resource: aws-xen-hvm-sles-12
-          passed: [bats] # acceptance
+          passed: [bats,acceptance]
         - {get: suse-ci,          trigger: false}
         - {get: bosh-aws-light-stemcell-builder,  trigger: false}
 
