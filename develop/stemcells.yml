@@ -645,7 +645,6 @@ jobs:
       - aggregate:
         - { get: suse-ci, tags: *tags }
         - { get: suse-cf, tags: *tags }
-        - { get: cpi-release, tags: *tags }
         - get: stemcell
           tags: *tags
           trigger: true
@@ -697,7 +696,6 @@ jobs:
       - aggregate:
         - { get: suse-ci, tags: *tags }
         - { get: suse-cf, tags: *tags }
-        - { get: cpi-release, tags: *tags }
         - get: stemcell
           tags: *tags
           trigger: true
@@ -774,11 +772,6 @@ resources:
     source:
       uri: {{repo}}
       branch: {{branch}}
-
-  - name: cpi-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry-incubator/bosh-openstack-cpi-release
 
   - name: bosh-deployment
     type: git
