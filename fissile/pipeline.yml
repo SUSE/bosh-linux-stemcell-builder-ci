@@ -61,7 +61,7 @@ jobs:
         params:
           TAG_PREFIX: ((os-image-tag-prefix-ubuntu))
           BUILD_ARGS_TMPL:
-            {"base_image": "splatform/os-image-ubuntu:base_image_tag_var", "configgin_version": "0.15.0"}
+            {"base_image": "splatform/os-image-ubuntu:base_image_tag_var", "configgin_version": "0.16.0"}
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
         input_mapping:
@@ -94,7 +94,7 @@ jobs:
         params:
           TAG_PREFIX: ((os-image-tag-prefix-opensuse))
           BUILD_ARGS_TMPL:
-            {"base_image": "splatform/os-image-opensuse:base_image_tag_var", "configgin_version": "0.15.0"}
+            {"base_image": "splatform/os-image-opensuse:base_image_tag_var", "configgin_version": "0.16.0"}
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
         input_mapping:
@@ -127,7 +127,7 @@ jobs:
         params:
           TAG_PREFIX: ((os-image-tag-prefix-sle))
           BUILD_ARGS_TMPL:
-            {"base_image": "((docker-internal-os-image)):base_image_tag_var", "configgin_version": "0.15.0"}
+            {"base_image": "((docker-internal-os-image)):base_image_tag_var", "configgin_version": "0.16.0"}
       - task: setup-sle-stemcell-versions
         file: ci/tasks/setup-sles-stemcell-versions.yml
         input_mapping:
