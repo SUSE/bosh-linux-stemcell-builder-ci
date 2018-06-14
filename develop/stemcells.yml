@@ -83,7 +83,6 @@ jobs:
           - { get: suse-ci, tags: *tags }
           - { get: suse-cf, tags: *tags }
           - { get: bosh-linux-stemcell-builder, tags: *tags }
-          - { get: bosh-release, tags: *tags }
           - { get: bosh-deployment, tags: *tags }
           - { get: bosh-cli, tags: *tags }
           - { get: syslog-release, tags: *tags }
@@ -132,7 +131,6 @@ jobs:
           - { get: suse-ci, tags: *tags }
           - { get: suse-cf, tags: *tags }
           - { get: bosh-linux-stemcell-builder, tags: *tags }
-          - { get: bosh-release, tags: *tags }
           - { get: bosh-deployment, tags: *tags }
           - { get: bosh-cli, tags: *tags }
           - { get: syslog-release, tags: *tags }
@@ -647,7 +645,6 @@ jobs:
       - aggregate:
         - { get: suse-ci, tags: *tags }
         - { get: suse-cf, tags: *tags }
-        - { get: bosh-release, tags: *tags }
         - { get: cpi-release, tags: *tags }
         - get: stemcell
           tags: *tags
@@ -700,7 +697,6 @@ jobs:
       - aggregate:
         - { get: suse-ci, tags: *tags }
         - { get: suse-cf, tags: *tags }
-        - { get: bosh-release, tags: *tags }
         - { get: cpi-release, tags: *tags }
         - get: stemcell
           tags: *tags
@@ -778,11 +774,6 @@ resources:
     source:
       uri: {{repo}}
       branch: {{branch}}
-
-  - name: bosh-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/bosh
 
   - name: cpi-release
     type: bosh-io-release

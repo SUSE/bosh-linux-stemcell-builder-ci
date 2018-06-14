@@ -13,7 +13,6 @@ inputs:
 - name: bosh-linux-stemcell-builder
 - name: bosh-cli
 - name: bosh-deployment
-- name: bosh-release
 - name: stemcell
 
 params:

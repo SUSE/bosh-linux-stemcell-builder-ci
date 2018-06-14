@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
+set -ev
+
 source /etc/profile.d/chruby.sh
 chruby 2.1.7
-
-set -ev
 
 function cp_artifacts {
   mv $HOME/.bosh director-state/
@@ -44,7 +44,7 @@ $bosh_cli -n upload-stemcell \
   $(realpath stemcell/*.tgz)
 
 $bosh_cli interpolate bosh-deployment/bosh.yml \
-  -o bosh-deployment/local-bosh-release-tarball.yml \
+  -o bosh-deployment/misc/source-releases/bosh.yml \
   -o bosh-deployment/openstack/cpi.yml \
   -o bosh-deployment/openstack/custom-ca.yml \
   -o bosh-deployment/misc/powerdns.yml \
@@ -60,13 +60,12 @@ $bosh_cli interpolate bosh-deployment/bosh.yml \
   -o suse-ci/assets/ops/custom-static-ip.yml \
   -o suse-ci/assets/ops/custom-password.yml \
   --vars-store director-creds.yml \
-  -v internal_dns="[$BOSH_dns_recursor_ip]" \
   -v director_name=bats-director \
   -v deployment_name=$(cat environment/name) \
+  -v internal_dns="[$BOSH_dns_recursor_ip]" \
   -v stemcell_os=$BOSH_os_name \
   -v stemcell_version="\"$(cat stemcell/version)\"" \
   -v static_ip=$BOSH_internal_ip \
-  -v local_bosh_release=$(realpath bosh-release/*.tgz) \
   --var-file=private_key=<(echo "$BOSH_private_key_data") \
   --var-file=openstack_ca_cert=<(echo "$BOSH_openstack_ca_cert_data") \
   --vars-env "BOSH" > director.yml
