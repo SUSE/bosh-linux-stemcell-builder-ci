@@ -12,8 +12,6 @@ inputs:
 - name: suse-ci
 - name: bosh-cli
 - name: bosh-deployment
-- name: bosh-release
-- name: bpm-release
 - name: stemcell
 
 params:

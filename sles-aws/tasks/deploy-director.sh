@@ -38,17 +38,14 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   -o bosh-deployment/misc/powerdns.yml \
   -o bosh-deployment/jumpbox-user.yml \
   -o bosh-src/ci/bats/ops/remove-health-monitor.yml \
-  -o bosh-deployment/local-bosh-release-tarball.yml \
+  -o bosh-deployment/misc/source-releases/bosh.yml \
   -o bosh-deployment/misc/bosh-dev.yml \
   -o suse-ci/assets/ops/rename-deployment.yml \
   -o suse-ci/assets/ops/rename-network.yml \
   -o suse-ci/assets/ops/custom-stemcell.yml \
-  -o suse-ci/assets/ops/local-bpm-release-tarball.yml \
   -v dns_recursor_ip=8.8.8.8 \
   -v director_name=$BOSH_DIRECTOR_NAME \
   -v deployment_name=$BOSH_DIRECTOR_NAME \
-  -v local_bosh_release=$(realpath bosh-release/*.tgz) \
-  -v local_bpm_release=$(realpath bpm-release/*.tgz) \
   -v stemcell_os=sles-12 \
   -v stemcell_version="\"$(cat stemcell/version)\"" \
   --vars-file <( suse-ci/sles-aws/director-vars ) \

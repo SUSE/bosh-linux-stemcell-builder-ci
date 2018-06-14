@@ -26,8 +26,6 @@ jobs:
         - {get: bats,             trigger: false}
         - {get: bosh-cli,         trigger: false}
         - {get: bosh-deployment,  trigger: false}
-        - {get: bosh-release,     trigger: false, resource: bosh-release}
-        - {get: bpm-release,     trigger: false, resource: bpm-release}
       - put: environment
         params:
           acquire: true
@@ -75,8 +73,6 @@ jobs:
         - {get: bosh-linux-stemcell-builder,  trigger: false}
         - {get: bosh-cli,         trigger: false}
         - {get: bosh-deployment,  trigger: false}
-        - {get: bosh-release,     trigger: false, resource: bosh-release}
-        - {get: bpm-release,     trigger: false, resource: bpm-release}
         - {get: syslog-release,  trigger: false}
         - {get: os-conf-release,  trigger: false}
       - put: environment
@@ -183,16 +179,6 @@ resources:
     type: time
     source:
       interval: 25h
-
-  - name: bosh-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry/bosh
-
-  - name: bpm-release
-    type: bosh-io-release
-    source:
-      repository: cloudfoundry-incubator/bpm-release
 
   - name: bosh-src
     type: git

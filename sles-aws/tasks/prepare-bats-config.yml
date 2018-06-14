@@ -7,7 +7,6 @@ image_resource:
     repository: bosh/compiled-release
 
 inputs:
-  - name: bosh-src
   - name: environment
   - name: director-state
   - name: suse-ci
