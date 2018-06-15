@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ev
+set -e
 
 : ${TARGET:="suse.de"}
 : ${CONCOURSE_SECRETS_FILE:="../../cloudfoundry/secure/concourse-secrets.yml.gpg"}

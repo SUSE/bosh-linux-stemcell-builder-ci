@@ -3,7 +3,7 @@
 source /etc/profile.d/chruby.sh
 chruby ruby
 
-set -evo pipefail
+set -eo pipefail
 
 function cp_artifacts {
   cp director.yml director-creds.yml director-state/
