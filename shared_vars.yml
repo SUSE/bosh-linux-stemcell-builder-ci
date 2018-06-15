@@ -1,3 +1,4 @@
+suse-ci-branch: master
 osimage-aws-bucket: suse-bosh-stemcells-us-west-1
 osimage-aws-region: us-west-1
 stemcell-aws-bucket: suse-bosh-stemcells-us-west-1

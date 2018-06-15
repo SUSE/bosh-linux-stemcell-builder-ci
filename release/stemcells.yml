@@ -422,6 +422,7 @@ resources:
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
       private_key: {{github-private-key}}
+      branch: {{suse-ci-branch}}
 
   - name: bosh-linux-stemcell-builder
     type: git

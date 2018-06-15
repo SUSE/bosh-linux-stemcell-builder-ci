@@ -5,7 +5,7 @@ NON_INTERACTIVE ?=
 
 all: release develop regression
 
-release: release-os-images release-stemcells release-fissile
+release: release-os-images release-stemcells release-fissile release-sles
 
 release-os-images:
 	bash -c "fly -t ${TARGET} set-pipeline ${NON_INTERACTIVE} \
@@ -99,10 +99,15 @@ regression-stemcells:
 	#fly -t ${TARGET} unpause-pipeline -p bosh:regression:stemcells
 	fly -t ${TARGET} expose-pipeline -p bosh:regression:stemcells
 
-release-sles: release-sles-os-images release-sles-stemcell
+release-sles: release-sles-os-images release-sles-stemcell release-sles-aws
 
 release-sles-os-images:
 	cd sles-os-images && ./configure.sh
 
 release-sles-stemcell:
 	cd sles-stemcell && ./configure.sh
+
+release-sles-aws: TARGET ?= sles
+release-sles-aws:
+	fly -t ${TARGET} login -k
+	cd sles-aws && ./configure.sh

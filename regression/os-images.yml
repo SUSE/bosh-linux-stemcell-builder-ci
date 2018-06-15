@@ -31,6 +31,7 @@ resources:
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci
       private_key: {{github-private-key}}
+      branch: {{suse-ci-branch}}
       path: ["tasks/"]
 
   - name: bosh-linux-stemcell-builder
