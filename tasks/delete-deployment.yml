@@ -7,9 +7,14 @@ image_resource:
 
 inputs:
   - name: suse-ci
+  - name: bosh-deployment
+  - name: bosh-linux-stemcell-builder
   - name: bosh-cli
-  - name: director-state
   - name: environment
+  - name: suse-cf
+
+outputs:
+  - name: director-state
 
 run:
-  path: suse-ci/tasks/destroy-director.sh
+  path: suse-ci/tasks/delete-deployment.sh

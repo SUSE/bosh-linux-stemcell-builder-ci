@@ -30,10 +30,16 @@ shared:
     tags: *tags
     file: bats/ci/tasks/run-bats.yml
 
-  - &teardown
-    task: teardown
+  - &destroy-director
+    try:
+      task: destroy-director
+      tags: *tags
+      file: suse-ci/tasks/destroy-director.yml
+
+  - &delete-deployment
+    task: delete-deployment
     tags: *tags
-    file: suse-ci/tasks/destroy-director.yml
+    file: suse-ci/tasks/delete-deployment.yml
 
 jobs:
   - name: test-unit
@@ -173,7 +179,8 @@ jobs:
               package: ipv4director
           ensure:
             do:
-            - <<: *teardown
+            - <<: *destroy-director
+            - <<: *delete-deployment
         ensure:
           do:
           - {put: environment, tags: *tags, params: {release: environment}}
@@ -224,7 +231,8 @@ jobs:
         - <<: *run-bats
         ensure:
           do:
-          - <<: *teardown
+          - <<: *destroy-director
+          - <<: *delete-deployment
       ensure:
         do:
         - {put: environment, tags: *tags, params: {release: environment}}
