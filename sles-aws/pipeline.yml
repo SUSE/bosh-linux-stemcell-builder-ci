@@ -13,8 +13,7 @@ shared:
 
 jobs:
   - name: bats
-    max_in_flight: 3
-    serial_groups: [outer-bosh-stemcell-upload]
+    serial_groups: [outer-bosh-lock]
     plan:
     - get: daily
       trigger: true
@@ -60,8 +59,7 @@ jobs:
             release: environment
 
   - name: acceptance
-    max_in_flight: 3
-    serial_groups: [outer-bosh-stemcell-upload]
+    serial_groups: [outer-bosh-lock]
     plan:
     - get: daily
       trigger: true
@@ -98,13 +96,10 @@ jobs:
           - try:
               task: destroy-director
               file: suse-ci/sles-aws/tasks/destroy-director.yml
-              params:
-                BOSH_DIRECTOR_NAME:    stemcell-acceptance-tests
           - task: delete-deployment
             file: suse-ci/sles-aws/tasks/delete-deployment.yml
             params:
               <<: *outer-bosh-params
-              BOSH_DIRECTOR_NAME:    stemcell-acceptance-tests
       ensure:
         do:
         - put: environment

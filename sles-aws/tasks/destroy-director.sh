@@ -7,17 +7,13 @@ chmod +x /usr/local/bin/bosh-cli
 
 state_path() { bosh-cli int director-state/director.yml --path="$1" ; }
 
-if [ -z "$BOSH_DIRECTOR_NAME" ]; then
-  name=$(cat environment/name)
-else
-  name="$BOSH_DIRECTOR_NAME"
-fi
+POOL_NAME=$(cat environment/name)
 
 function get_bosh_environment {
-  if [[ -z $(state_path /instance_groups/name=bosh/networks/name=$name/static_ips/0 2>/dev/null) ]]; then
+  if [[ -z $(state_path /instance_groups/name=bosh/networks/name=$POOL_NAME/static_ips/0 2>/dev/null) ]]; then
     state_path /instance_groups/name=bosh/networks/name=default/static_ips/0 2>/dev/null
   else
-    state_path /instance_groups/name=bosh/networks/name=$name/static_ips/0 2>/dev/null
+    state_path /instance_groups/name=bosh/networks/name=$POOL_NAME/static_ips/0 2>/dev/null
   fi
 }
 

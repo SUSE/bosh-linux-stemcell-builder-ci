@@ -17,8 +17,9 @@ trap cp_artifacts EXIT
 : ${BOSH_CLIENT:?}
 : ${BOSH_CLIENT_SECRET:?}
 
+POOL_NAME=`cat environment/name`
 if [ -z "$BOSH_DIRECTOR_NAME"]; then
-  BOSH_DIRECTOR_NAME=`cat environment/name`
+  BOSH_DIRECTOR_NAME="$POOL_NAME"
 fi
 
 cp bosh-cli/bosh-cli-* /usr/local/bin/bosh-cli
@@ -26,8 +27,8 @@ chmod +x /usr/local/bin/bosh-cli
 
 bosh-cli -n update-config \
   --type cloud \
-  --name $BOSH_DIRECTOR_NAME \
-  --var=env_name=$BOSH_DIRECTOR_NAME \
+  --name $POOL_NAME \
+  --var=env_name=$POOL_NAME \
   --vars-file <( suse-ci/sles-aws/director-vars ) \
   suse-ci/assets/cloud-config-aws.yml
 
@@ -45,7 +46,7 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   -o suse-ci/assets/ops/custom-stemcell.yml \
   -v dns_recursor_ip=8.8.8.8 \
   -v director_name=$BOSH_DIRECTOR_NAME \
-  -v deployment_name=$BOSH_DIRECTOR_NAME \
+  -v deployment_name=$POOL_NAME \
   -v stemcell_os=sles-12 \
   -v stemcell_version="\"$(cat stemcell/version)\"" \
   --vars-file <( suse-ci/sles-aws/director-vars ) \
@@ -53,6 +54,6 @@ bosh-cli interpolate bosh-deployment/bosh.yml \
   > director.yml
 
 bosh-cli deploy -n \
-  -d $BOSH_DIRECTOR_NAME \
+  -d $POOL_NAME \
   --vars-store director-creds.yml \
   director.yml
