@@ -8,7 +8,7 @@ chmod +x $BOSH_BINARY_PATH
 state_path() { $BOSH_BINARY_PATH int director-state/director.yml --path="$1" ; }
 creds_path() { $BOSH_BINARY_PATH int director-state/director-creds.yml --path="$1" ; }
 
-name=stemcell-acceptance-tests
+name=$(cat environment/name)
 export BOSH_ENVIRONMENT="$( state_path /instance_groups/name=bosh/networks/name=$name/static_ips/0 2>/dev/null )"
 export BOSH_CLIENT="admin"
 export BOSH_CLIENT_SECRET="$( creds_path /admin_password )"
