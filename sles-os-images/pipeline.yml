@@ -6,8 +6,6 @@ jobs:
         trigger: true
       - get: bosh-linux-stemcell-builder
         trigger: true
-      - get: 42h
-        trigger: true
       - task: build
         file: bosh-linux-stemcell-builder/ci/os-images/tasks/build-opensuse.yml
         input_mapping:
@@ -30,11 +28,6 @@ resource_types:
     tag: latest
 
 resources:
-  - name: 42h
-    type: time
-    source:
-      interval: 42h
-
   - name: lftp.os-image-sle
     type: lftp-resource
     source:
