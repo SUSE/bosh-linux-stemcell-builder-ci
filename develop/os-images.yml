@@ -21,23 +21,6 @@ jobs:
           file: os-image/ubuntu-trusty.tgz
           acl: public-read
 
-  - name: build-ubuntu-xenial
-    serial_groups: [ubuntu]
-    plan:
-      - get: bosh-linux-stemcell-builder
-        trigger: true
-      - task: build
-        tags: *tags
-        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
-        privileged: true
-        params:
-          OPERATING_SYSTEM_NAME:      ubuntu
-          OPERATING_SYSTEM_VERSION:   xenial
-      - put: ubuntu-xenial-tarball
-        params:
-          file: os-image/ubuntu-xenial.tgz
-          acl: public-read
-
   - name: build-opensuse-leap
     plan:
       - get: lftp.os-image-opensuse
@@ -86,18 +69,6 @@ resources:
     source:
       bucket: {{osimage-aws-bucket}}
       versioned_file: ((osimage-aws-directory))/bosh-ubuntu-trusty-os-image.tgz
-      access_key_id: {{osimage-aws-access-key}}
-      secret_access_key: {{osimage-aws-secret-key}}
-      region_name: {{osimage-aws-region}}
-
-  #
-  # ubuntu-xenial
-  #
-  - name: ubuntu-xenial-tarball
-    type: s3
-    source:
-      bucket: {{osimage-aws-bucket}}
-      versioned_file: ((osimage-aws-directory))/bosh-ubuntu-xenial-os-image.tgz
       access_key_id: {{osimage-aws-access-key}}
       secret_access_key: {{osimage-aws-secret-key}}
       region_name: {{osimage-aws-region}}
