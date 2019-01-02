@@ -38,23 +38,6 @@ jobs:
           file: os-image/ubuntu-xenial.tgz
           acl: public-read
 
-  - name: build-centos-7
-    serial_groups: [ubuntu]
-    plan:
-      - get: bosh-linux-stemcell-builder
-        trigger: true
-      - task: build
-        tags: *tags
-        file: bosh-linux-stemcell-builder/ci/os-images/tasks/build.yml
-        privileged: true
-        params:
-          OPERATING_SYSTEM_NAME:      centos
-          OPERATING_SYSTEM_VERSION:   7
-      - put: centos-7-tarball
-        params:
-          file: os-image/centos-7.tgz
-          acl: public-read
-
   - name: build-opensuse-leap
     plan:
       - get: lftp.os-image-opensuse
@@ -115,19 +98,6 @@ resources:
     source:
       bucket: {{osimage-aws-bucket}}
       versioned_file: ((osimage-aws-directory))/bosh-ubuntu-xenial-os-image.tgz
-      access_key_id: {{osimage-aws-access-key}}
-      secret_access_key: {{osimage-aws-secret-key}}
-      region_name: {{osimage-aws-region}}
-
-  #
-  # centos-7
-  #
-
-  - name: centos-7-tarball
-    type: s3
-    source:
-      bucket: {{osimage-aws-bucket}}
-      versioned_file: ((osimage-aws-directory))/bosh-centos-7-os-image.tgz
       access_key_id: {{osimage-aws-access-key}}
       secret_access_key: {{osimage-aws-secret-key}}
       region_name: {{osimage-aws-region}}
