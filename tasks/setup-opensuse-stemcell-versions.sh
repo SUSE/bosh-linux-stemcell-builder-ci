@@ -62,3 +62,4 @@ set +o errexit +o nounset +o xtrace
 
 sed -i "s@FROM splatform/os-image-opensuse:42.2@FROM splatform/$DOCKER_REPOSITORY:42.2-$OS_IMAGE_VERSION@" Dockerfile
 echo $STEMCELL_VERSION > VERSION
+cp VERSION fissile-stemcell-opensuse-version
