@@ -110,6 +110,10 @@ jobs:
           tag_as_latest: ((tag-as-latest))
         get_params:
           skip_download: true
+      - put: s3.fissile-stemcell-opensuse-version
+        params:
+          file: versioned-fissile-stemcell-opensuse/fissile-stemcell-opensuse-version
+          acl: public-read
 
   - name: build-fissile-stemcell-sle-12
     plan:
@@ -272,3 +276,11 @@ resources:
       access_key_id: {{sles-stemcell-aws-access-key}}
       secret_access_key: {{sles-stemcell-aws-secret-key}}
       region_name: {{sles-osimage-aws-region}}
+
+  - name: s3.fissile-stemcell-opensuse-version
+    type: s3
+    source:
+      bucket: {{stemcell-version-aws-bucket}}
+      versioned_file: fissile-stemcell-versions/fissile-stemcell-opensuse-version
+      access_key_id: {{stemcell-version-aws-access-key}}
+      secret_access_key: {{stemcell-version-aws-secret-key}}
