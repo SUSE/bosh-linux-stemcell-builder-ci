@@ -157,7 +157,6 @@ resources:
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
       private_key: {{github-private-key}}
-      branch: aduffeck/add_labels
 
   - name: git.fissile-stemcell-opensuse
     type: git
