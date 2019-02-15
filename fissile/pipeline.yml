@@ -54,20 +54,21 @@ jobs:
           - upload-os-image-to-docker-ubuntu-trusty
       - get: git.fissile-stemcell-ubuntu
         trigger: true
-      - task: prepare_docker_build_args
-        file: ci/tasks/prepare_docker_build_args.yml
-        input_mapping:
-          semver.os-image: semver.os-image-ubuntu
-        params:
-          TAG_PREFIX: ((os-image-tag-prefix-ubuntu))
-          BUILD_ARGS_TMPL:
-            {"base_image": "splatform/os-image-ubuntu:base_image_tag_var"}
       - task: setup-ubuntu-stemcell-versions
         file: ci/tasks/setup-ubuntu-stemcell-versions.yml
         input_mapping:
           src: git.fissile-stemcell-ubuntu
         params:
           DOCKER_REPOSITORY: os-image-ubuntu
+      - task: prepare_docker_build_args
+        file: ci/tasks/prepare_docker_build_args.yml
+        input_mapping:
+          semver.os-image: semver.os-image-ubuntu
+          versioned-stemcell: versioned-fissile-stemcell-ubuntu
+        params:
+          TAG_PREFIX: ((os-image-tag-prefix-ubuntu))
+          BUILD_ARGS_TMPL:
+            {"base_image": "splatform/os-image-ubuntu:base_image_tag_var", "stemcell_version": "version_var"}
       - put: docker.fissile-stemcell-ubuntu
         params:
           build: versioned-fissile-stemcell-ubuntu
@@ -87,20 +88,21 @@ jobs:
           - upload-os-image-to-docker-opensuse-leap
       - get: git.fissile-stemcell-opensuse
         trigger: true
-      - task: prepare_docker_build_args
-        file: ci/tasks/prepare_docker_build_args.yml
-        input_mapping:
-          semver.os-image: semver.os-image-opensuse
-        params:
-          TAG_PREFIX: ((os-image-tag-prefix-opensuse))
-          BUILD_ARGS_TMPL:
-            {"base_image": "splatform/os-image-opensuse:base_image_tag_var"}
       - task: setup-opensuse-stemcell-versions
         file: ci/tasks/setup-opensuse-stemcell-versions.yml
         input_mapping:
           src: git.fissile-stemcell-opensuse
         params:
           DOCKER_REPOSITORY: os-image-opensuse
+      - task: prepare_docker_build_args
+        file: ci/tasks/prepare_docker_build_args.yml
+        input_mapping:
+          semver.os-image: semver.os-image-opensuse
+          versioned-stemcell: versioned-fissile-stemcell-opensuse
+        params:
+          TAG_PREFIX: ((os-image-tag-prefix-opensuse))
+          BUILD_ARGS_TMPL:
+            {"base_image": "splatform/os-image-opensuse:base_image_tag_var", "stemcell_version": "version_var"}
       - put: docker.fissile-stemcell-opensuse
         params:
           build: versioned-fissile-stemcell-opensuse
@@ -124,20 +126,21 @@ jobs:
           - upload-os-image-to-docker-sle-12
       - get: git.fissile-stemcell-sle
         trigger: true
-      - task: prepare_docker_build_args
-        file: ci/tasks/prepare_docker_build_args.yml
-        input_mapping:
-          semver.os-image: semver.os-image-sle12
-        params:
-          TAG_PREFIX: ((os-image-tag-prefix-sle))
-          BUILD_ARGS_TMPL:
-            {"base_image": "((docker-internal-os-image)):base_image_tag_var"}
       - task: setup-sle-stemcell-versions
         file: ci/tasks/setup-sles-stemcell-versions.yml
         input_mapping:
           src: git.fissile-stemcell-sle
         params:
           DOCKER_REPOSITORY: os-image-sle12
+      - task: prepare_docker_build_args
+        file: ci/tasks/prepare_docker_build_args.yml
+        input_mapping:
+          semver.os-image: semver.os-image-sle12
+          versioned-stemcell: versioned-fissile-stemcell-sles
+        params:
+          TAG_PREFIX: ((os-image-tag-prefix-sle))
+          BUILD_ARGS_TMPL:
+            {"base_image": "((docker-internal-os-image)):base_image_tag_var", "stemcell_version": "version_var"}
       - put: docker.fissile-stemcell-sle
         params:
           build: versioned-fissile-stemcell-sles
@@ -154,6 +157,7 @@ resources:
     source:
       uri: git@github.com:SUSE/bosh-linux-stemcell-builder-ci.git
       private_key: {{github-private-key}}
+      branch: aduffeck/add_labels
 
   - name: git.fissile-stemcell-opensuse
     type: git
