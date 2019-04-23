@@ -284,6 +284,6 @@ resources:
     type: s3
     source:
       bucket: {{stemcell-version-aws-bucket}}
-      versioned_file: fissile-stemcell-versions/fissile-stemcell-opensuse-version
+      versioned_file: fissile-stemcell-versions/fissile-stemcell-opensuse-version-develop
       access_key_id: {{stemcell-version-aws-access-key}}
       secret_access_key: {{stemcell-version-aws-secret-key}}

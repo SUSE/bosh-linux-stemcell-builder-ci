@@ -57,6 +57,7 @@ resources:
   - name: bosh-linux-stemcell-builder
     type: git
     source:
+      submodules: all
       uri: {{repo}}
       branch: {{branch}}
 
