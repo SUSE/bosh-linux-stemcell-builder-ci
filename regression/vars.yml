@@ -1,8 +1,0 @@
-repo: https://github.com/cloudfoundry/bosh-linux-stemcell-builder.git
-branch: master
-
-osimage-aws-directory: regression/os-images
-
-stemcell-aws-directory: regression/stemcells
-stemcell-version-key: regression/stemcells/version
-stemcell-version-semver-bump: major
