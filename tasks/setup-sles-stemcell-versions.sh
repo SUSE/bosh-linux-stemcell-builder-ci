@@ -8,7 +8,7 @@
 # commit, the number of additional commits since this tag and the abbreviated object name of the commit. The tag
 # describes the OS version that is supported by this branch. Example version:
 #
-#   12SP3-0.g58a22c9
+#   12SP4-0.g58a22c9
 #   |__| | |______|
 #    |   |    |-> commit id
 #    |   |-> number of commits since tag
@@ -19,7 +19,7 @@
 # 2. The docker base image containing the according base BOSH os-image, e.g.
 #    https://hub.docker.com/r/splatform/os-image-sle12/
 #
-# The os-image image has a version that describes the OS version plus a MAJOR and a MINOR version, e.g. `12SP3-28.2`.
+# The os-image image has a version that describes the OS version plus a MAJOR and a MINOR version, e.g. `12SP4-28.2`.
 # The MAJOR version is bumped when new features or components are added, the MINOR version is bumped on security or
 # other smaller fixes. Since the OS version always matches the fissile stemcell git repository one only MAJOR and MINOR
 # versions are used.
@@ -27,7 +27,7 @@
 #
 # The final version is a concatenation of both parts and looks like this:
 #
-#   12SP3-0.g58a22c9-28.2
+#   12SP4-0.g58a22c9-28.2
 #
 # The version is used as a tag for the resulting fissile stemcell docker image (see
 # https://hub.docker.com/r/splatform/fissile-stemcell-sles/tags/ for the latest versions).
@@ -60,5 +60,5 @@ STEMCELL_VERSION=${ARTIFACT_VERSION}-${OS_IMAGE_VERSION_STRIPPED}
 
 set +o errexit +o nounset +o xtrace
 
-sed -i "s@FROM splatform/os-image-sle12:12SP3@FROM splatform/$DOCKER_REPOSITORY:12SP3-$OS_IMAGE_VERSION@" Dockerfile
+sed -i "s@FROM splatform/os-image-sle12:12SP4@FROM splatform/$DOCKER_REPOSITORY:12SP4-$OS_IMAGE_VERSION@" Dockerfile
 echo $STEMCELL_VERSION > VERSION

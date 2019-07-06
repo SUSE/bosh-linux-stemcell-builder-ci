@@ -32,7 +32,7 @@ resources:
     type: lftp-resource
     source:
       url: http://download.opensuse.org/repositories/Cloud:/Platform:/os-image:/SLE/images/
-      regexp: SLES12-SP3.x86_64-2.12.3-Build(.*).tbz
+      regexp: SLES12-SP4.x86_64-2.12.3-Build(.*).tar.xz
 
   - name: bosh-linux-stemcell-builder
     type: git
