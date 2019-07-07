@@ -4,8 +4,8 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: opensuse
-    tag: leap
+    repository: opensuse/leap
+    tag: latest
 
 inputs:
   - name: ci
