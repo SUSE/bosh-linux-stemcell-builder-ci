@@ -247,15 +247,15 @@ resources:
     type: docker-image
     source:
       repository: {{docker-internal-os-image}}
-      username: {{docker-internal-username}}
-      password: {{docker-internal-password}}
+      username: {{docker-public-staging-username}}
+      password: {{docker-public-staging-password}}
 
   - name: docker.fissile-stemcell-sle
     type: docker-image
     source:
       repository: {{docker-internal-fissile-image}}
-      username: {{docker-internal-username}}
-      password: {{docker-internal-password}}
+      username: {{docker-public-staging-username}}
+      password: {{docker-public-staging-password}}
 
   - name: s3.ubuntu-os-image
     type: s3
