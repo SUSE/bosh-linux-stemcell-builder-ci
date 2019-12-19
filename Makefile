@@ -3,7 +3,7 @@ CONCOURSE_SECRETS_FILE ?= ../cloudfoundry/secure/concourse-secrets.yml.gpg
 TERRAFORM_DATA_DIR ?= ../cloudfoundry/engcloud.prv.suse.net/terraform
 NON_INTERACTIVE ?=
 
-all: release develop regression
+all: release
 
 release: release-os-images release-stemcells release-fissile release-sles
 
